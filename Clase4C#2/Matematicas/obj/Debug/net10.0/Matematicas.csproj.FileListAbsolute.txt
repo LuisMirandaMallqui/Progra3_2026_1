@@ -1,0 +1,12 @@
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\bin\Debug\net10.0\Matematicas.deps.json
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\bin\Debug\net10.0\Matematicas.dll
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\bin\Debug\net10.0\Matematicas.pdb
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\Matematicas.GeneratedMSBuildEditorConfig.editorconfig
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\Matematicas.AssemblyInfoInputs.cache
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\Matematicas.AssemblyInfo.cs
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\Matematicas.csproj.CoreCompileInputs.cache
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\Matematicas.sourcelink.json
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\Matematicas.dll
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\refint\Matematicas.dll
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\Matematicas.pdb
+D:\8voCiclo\progra3\Clase4C#2\Matematicas\obj\Debug\net10.0\ref\Matematicas.dll
