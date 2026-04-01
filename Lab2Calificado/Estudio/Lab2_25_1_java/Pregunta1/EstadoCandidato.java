@@ -1,0 +1,3 @@
+enum EstadoCandidato{
+	ADMITIDO, NO_ADMITIDO, SIN_EVALUACION
+}
