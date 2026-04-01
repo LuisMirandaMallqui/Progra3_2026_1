@@ -1,0 +1,22 @@
+Se emplea el patrón Abstract Factory para instanciar objetos como Articulo, Libro y Tesis usando interfaces.
+interface AbstractFactoryPublicacion {
+    Articulo crearArticulo();
+    Libro crearLibro();
+    Tesis crearTesis();
+}
+Claro. El patrón **Builder** es un patrón de diseño creacional que te permite construir objetos complejos paso a paso. La idea principal es **separar el proceso de construcción de un objeto de su representación final**.
+
+Piensa en cómo pides una pizza 🍕. No le dices al cocinero todos los ingredientes en una sola frase larguísima y confusa. Lo haces paso a paso:
+
+1. Quiero una masa delgada.
+2. Ponle salsa de tomate.
+3. Añade queso mozzarella.
+4. Añade pepperoni.
+5. ¡Listo! Ya tienes tu pizza.
+
+El patrón Builder funciona exactamente igual en el código.
+El Problema que Resuelve: El "Constructor Telescópico"
+
+
+
+https://www.notion.so/Programaci-n-3-25d27d0e6ea68045800af31acaf31007
