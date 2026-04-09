@@ -6,7 +6,7 @@ public class Fila{
 	private ArrayList<Object> listaDatos;
 	
 	public Fila(){
-		
+		this.listaDatos = new ArrayList<>();
 	}
 	
 	public void insertarEntero(Integer dato){

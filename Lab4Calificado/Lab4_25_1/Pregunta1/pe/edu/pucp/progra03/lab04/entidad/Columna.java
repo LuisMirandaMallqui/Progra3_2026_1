@@ -8,5 +8,9 @@ public class Columna{
 		
 	}
 	
+	public Columna(String nombre, TipoDeDato tipoDeDato){
+		this.nombre = nombre;
+		this.tipoDeDato = tipoDeDato;
+	}
 	
 }

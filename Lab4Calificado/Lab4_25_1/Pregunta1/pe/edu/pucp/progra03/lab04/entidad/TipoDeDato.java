@@ -1,5 +1,5 @@
 package pe.edu.pucp.progra03.lab04.entidad;
 
-enum TipoDeDato{
+public enum TipoDeDato{
 	NUMERO,CADENA
 }

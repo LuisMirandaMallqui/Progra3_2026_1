@@ -7,6 +7,16 @@ public class Entidad{
 	protected ArrayList<Columna> listaColumnas;
 	private ArrayList<Fila> listaFilas;
 	
+	public Entidad(){
+		 
+	}
+
+	public Entidad(String nombre,ArrayList<Columna> listaColumnas){
+		this.nombre = nombre;
+		this.listaColumnas = listaColumnas;
+		this.listaFilas = new ArrayList<>();
+	}
+	
 	public void insertarFila(){
 		Fila fila = new Fila();
 		listaFilas.add(fila);
