@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: com.medicalsoft.program.main.Principal
+Class-Path: medicalsoftRRHHModel.jar medicalsoftInfraModel.jar medicalsoftServModel.jar
+

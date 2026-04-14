@@ -1,0 +1,22 @@
+1.
+Ejercicio03>javac com\medicalsoft\rrhh\model\*.java
+2.
+Ejercicio03>jar -cf medicalsoftRRHHModel.jar com\medicalsoft\rrhh\model\*.java
+3.
+Ejercicio03>javac -cp medicalsoftRRHHModel.jar; com\medicalsoft\infraestructura\model\*.java
+4.
+Ejercicio03>jar -cf medicalsoftInfraModel.jar com\medicalsoft\infraestructura\model\*.class
+5.
+Ejercicio03>javac -cp medicalsoftRRHHModel.jar;medicalsoftInfraModel.jar com\medicalsoft\servicios\model\*.java
+6.
+jar -cf medicalsoftServModel.jar com\medicalsoft\servicios\model\*.class
+7.
+Ejercicio03>javac -cp medicalsoftInfraModel.jar;medicalsoftRRHHModel.jar;medicalsoftServModel.jar com\medicalsoft\program\main\Principal.java
+8. 
+Ejercicio03>jar -cf medicalsoftPrincipal.jar com\medicalsoft\program\main\Principal.class
+9. 
+Ejercicio03>jar -cfm medicalsoftPrincipal.jar MANIFEST.MF com\medicalsoft\program\main\Principal.class
+
+Manifest-Version: 1.0
+Main-Class: com.medicalsoft.program.main.Principal
+IMPORTANTE Dejar dos lineas en blanco al final
