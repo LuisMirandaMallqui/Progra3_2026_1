@@ -19,4 +19,5 @@ Ejercicio03>jar -cfm medicalsoftPrincipal.jar MANIFEST.MF com\medicalsoft\progra
 
 Manifest-Version: 1.0
 Main-Class: com.medicalsoft.program.main.Principal
+Class-Path: medicalsoftRRHHModel.jar medicalsoftInfraModel.jar medicalsoftServModel.jar
 IMPORTANTE Dejar dos lineas en blanco al final
