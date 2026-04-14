@@ -1,0 +1,6 @@
+cd build
+jar cvf ../lib/pregunta1.jar pe/edu/pucp/progra03/lab04/entidad/*.class
+
+luego:
+cd ..  para volver a raiz pregunta1.jar
+java -classpath lib/pregunta1.jar;build_principal pe.edu.pucp.progra03.lab04.Principal_P1

@@ -8,6 +8,11 @@ public class Columna{
 		
 	}
 	
+	//setters y getters necesarios
+	public String getNombre(){
+		return nombre;
+	}
+	
 	public Columna(String nombre, TipoDeDato tipoDeDato){
 		this.nombre = nombre;
 		this.tipoDeDato = tipoDeDato;
