@@ -12,6 +12,7 @@
         <module>SoftProgModel</module>
         <module>SoftProg</module>
         <module>SoftProgDBManager</module>
+        <module>SoftProgPersistencia</module>
     </modules>
 
     <properties>

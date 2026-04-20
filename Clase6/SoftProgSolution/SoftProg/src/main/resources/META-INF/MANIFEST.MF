@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Main-Class: pe.edu.pucp.softprog.main.Principal
+Class-Path: libs/protobuf-java-4.31.1.jar libs/mysql-connector-j-9.6.0.j
+ ar libs/SoftProgModel.jar libs/SoftProgDBManager.jar
+

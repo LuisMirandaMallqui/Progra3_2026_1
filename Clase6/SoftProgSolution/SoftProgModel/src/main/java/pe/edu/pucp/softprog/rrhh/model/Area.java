@@ -1,5 +1,4 @@
 package pe.edu.pucp.softprog.rrhh.model;
-
 public class Area {
     private int idArea;
     private String nombre;
@@ -27,5 +26,10 @@ public class Area {
 
     public void setActiva(boolean activa) {
         this.activa = activa;
+    }
+
+    @Override
+    public String toString() {
+       return "AREA: " + idArea + ". " + nombre;
     }
 }

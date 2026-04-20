@@ -1,32 +1,43 @@
 package pe.edu.pucp.softprog.main;
-
-import pe.edu.pucp.softprog.config.DBManager;
+import pe.edu.pucp.softprog.rrhh.dao.AreaDAO;
+import pe.edu.pucp.softprog.rrhh.impl.AreaImpl;
 import pe.edu.pucp.softprog.rrhh.model.Area;
 
-import java.sql.*;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.List;
+import java.util.ResourceBundle;
+import pe.edu.pucp.softprog.config.DBManager;
 
 public class Principal {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         Area area = new Area();
-        area.setNombre("CONTABILIDAD");
-       System.out.println(area.getNombre());
-        try {
-            Connection con = DBManager.getDbManager().getConnection();
-            System.out.println("conexión establecida");
-            Statement st = con.createStatement();
-            String sql = "INSERT INTO area(nombre,activa)"+
-                    "VALUES('FINANZAS',1)";
-            st.executeUpdate(sql);
-            System.out.println("EJECUTADO OK");
-            sql = "SELECT * FROM area";
-            ResultSet rs = st.executeQuery(sql);
-            while(rs.next()){  // mientras pueda ir avanznado fila en fila
-                System.out.println(rs.getInt("id_area") +
-                        rs.getString("nombre"));
-            }
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        area.setNombre("DOCENCIA");
+
+        AreaDAO daoArea = new AreaImpl();
+        int resultado = daoArea.insertar(area);
+        if(resultado!=0)
+            System.out.println("Se ha insertado correctamente");
+
+        List<Area> areas = daoArea.listarTodas();
+//        for(Area a : areas){
+//            System.out.println(a);
+//        }
+//        for(int i=0; i<areas.size();i++){
+//            System.out.println(areas.get(i));
+//        }
+
+        Area areaBuscada = daoArea.buscarPorId(2);
+        System.out.println(areaBuscada);
+
+        areaBuscada.setNombre("COMPRAS");
+        resultado = daoArea.modificar(areaBuscada);
+        if(resultado!=0)
+            System.out.println("Se ha modificado");
+        resultado = daoArea.eliminar(areaBuscada.getIdArea());
+        if(resultado!=0)
+            System.out.println("Se ha eliminado");
     }
 }

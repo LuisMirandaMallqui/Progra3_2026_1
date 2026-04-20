@@ -1,5 +1,4 @@
 package pe.edu.pucp.softprog.rrhh.model;
-
 import java.util.Date;
 
 public class Persona {
@@ -8,7 +7,7 @@ public class Persona {
     private String nombre;
     private String apellidoPaterno;
     private char genero;
-    private Date fechaNacimieto;
+    private Date fechaNacimiento;
 
     public int getIdPersona() {
         return idPersona;
@@ -50,11 +49,11 @@ public class Persona {
         this.genero = genero;
     }
 
-    public Date getFechaNacimieto() {
-        return fechaNacimieto;
+    public Date getFechaNacimiento() {
+        return fechaNacimiento;
     }
 
-    public void setFechaNacimieto(Date fechaNacimieto) {
-        this.fechaNacimieto = fechaNacimieto;
+    public void setFechaNacimiento(Date fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
     }
 }
