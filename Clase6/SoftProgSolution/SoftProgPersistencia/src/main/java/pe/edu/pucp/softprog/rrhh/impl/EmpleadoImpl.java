@@ -3,15 +3,18 @@ package pe.edu.pucp.softprog.rrhh.impl;
 import pe.edu.pucp.softprog.config.DBManager;
 import pe.edu.pucp.softprog.rrhh.dao.EmpleadoDAO;
 import pe.edu.pucp.softprog.rrhh.model.Empleado;
+import pe.edu.pucp.softprog.rrhh.model.Area;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
-public class EmpleadoImpl  implements EmpleadoDAO {
+public class EmpleadoImpl implements EmpleadoDAO {
+
     private Connection con;
     private PreparedStatement pst;
+    private ResultSet rs;
+    private CallableStatement cs;
 
     @Override
     public List<Empleado> buscarPorDNI(String DNI) {
@@ -19,58 +22,136 @@ public class EmpleadoImpl  implements EmpleadoDAO {
     }
 
     @Override
-    public int insertar(Empleado objeto) {
+    public int insertar(Empleado empleado) {
         int resultado = 0;
         try{
             con = DBManager.getInstance().getConnection();
-            String sql = "INSERT INTO persona(DNI,nombre," +
-                    "apellido_paterno,genero,fecha_nacimiento) VALUES" +
-                    "(?,?,?,?,?)";
-            pst = con.prepareStatement(sql);
-            pst.setString(1,empleado.getDNI());
-            pst.setString(2,empleado.getNombre());
-            pst.setString(3,empleado.getApellidoPaterno());
-            pst.setString(4,String.valueOf(empleado.getGenero()));
-            pst.setString(5, new java.sql.Date(empleado.getFechaNacimiento().getTime()));
-            resultado = pst.executeUpdate();
-            sql = "SELECT @@last_insert_id AS id_persona";
-            pst = con.prepareStatement(sql);
-            rs = pst.executeQuery();
-            rs.next();
-            empleado.setIdPersona(rs.getInt("id_persona"));
-            sql = "INSERT INTO empleado(id_empleado,fid_area," +
-                    "cargo,sueldo,activo) VALUES " +
-                    "(?,?,?,?,1)";
-            pst = con.prepareStatement(sql);
-            pst.setInt(1,empleado.getIdPersona());
-            pst.setInt(2,empleado.getArea().getIdArea());
-
-
-
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        } finally {
-            try{pst.close();}cath(Exception ex){System.out.println(ex);}
+            cs = con.prepareCall("{call INSERTAR_EMPLEADO (?,?,?,?,?,?,?,?,?)}");
+            cs.registerOutParameter("_id_empleado", Types.INTEGER);
+            cs.setString("_DNI",empleado.getDNI());
+            cs.setString("_nombre", empleado.getNombre());
+            cs.setString("_apellido_paterno", empleado.getApellidoPaterno());
+            cs.setString("_genero", String.valueOf(empleado.getGenero()));
+            cs.setDate("_fecha_nacimiento", new java.sql.Date(empleado.getFechaNacimiento().getTime()));
+            cs.setInt("_fid_area",empleado.getArea().getIdArea());
+            cs.setString("_cargo", empleado.getCargo());
+            cs.setDouble("_sueldo",empleado.getSueldo());
+            cs.executeUpdate();
+            empleado.setIdPersona(cs.getInt("_id_empleado"));
+            resultado = empleado.getIdPersona();
+        }catch(Exception ex){
+            System.out.println("Error al insertar empleado: " + ex.getMessage());
+        }finally{
+            try{cs.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+            try{con.close();}catch(Exception ex){System.out.println(ex.getMessage());}
         }
+        return resultado;
     }
 
     @Override
-    public int modificar(Empleado objeto) {
-        return 0;
+    public int modificar(Empleado empleado) {
+        int resultado = 0;
+        try{
+            con = DBManager.getInstance().getConnection();
+            cs = con.prepareCall("{call MODIFICAR_EMPLEADO (?,?,?,?,?,?,?,?,?)}");
+            cs.setInt("_id_empleado", empleado.getIdPersona());
+            cs.setString("_DNI",empleado.getDNI());
+            cs.setString("_nombre", empleado.getNombre());
+            cs.setString("_apellido_paterno", empleado.getApellidoPaterno());
+            cs.setString("_genero", String.valueOf(empleado.getGenero()));
+            cs.setDate("_fecha_nacimiento", new java.sql.Date(empleado.getFechaNacimiento().getTime()));
+            cs.setInt("_fid_area",empleado.getArea().getIdArea());
+            cs.setString("_cargo", empleado.getCargo());
+            cs.setDouble("_sueldo",empleado.getSueldo());
+            resultado = cs.executeUpdate();
+        }catch(Exception ex){
+            System.out.println("Error al modificar empleado: " + ex.getMessage());
+        }finally{
+            try{cs.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+            try{con.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+        }
+        return resultado;
     }
 
     @Override
-    public int eliminar(int id) {
-        return 0;
+    public int eliminar(int idEmpleado) {
+        int resultado = 0;
+        try{
+            con = DBManager.getInstance().getConnection();
+            cs = con.prepareCall("{call ELIMINAR_EMPLEADO (?)}");
+            cs.setInt("_id_empleado", idEmpleado);
+            resultado = cs.executeUpdate();
+        }catch(Exception ex){
+            System.out.println("Error al eliminar empleado: " + ex.getMessage());
+        }finally{
+            try{cs.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+            try{con.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+        }
+        return resultado;
     }
 
     @Override
-    public Empleado buscarPorId(int id) {
-        return null;
+    public Empleado buscarPorId(int idEmpleado) {
+        Empleado empleado = null;
+        try{
+            con = DBManager.getInstance().getConnection();
+            cs = con.prepareCall("{call LISTAR_EMPLEADO_X_ID(?)}");
+            cs.setInt("_id_empleado", idEmpleado);
+            rs = cs.executeQuery();
+            if(rs.next()){
+                if(empleado == null) empleado = new Empleado();
+                empleado.setIdPersona(rs.getInt("id_persona"));
+                empleado.setDNI(rs.getString("DNI"));
+                empleado.setNombre(rs.getString("nombre"));
+                empleado.setApellidoPaterno(rs.getString("apellido_paterno"));
+                empleado.setGenero(rs.getString("genero").charAt(0));
+                empleado.setFechaNacimiento(rs.getDate("fecha_nacimiento"));
+                Area area = new Area();
+                area.setIdArea(rs.getInt("id_area"));
+                area.setNombre(rs.getString("nombre_area"));
+                empleado.setArea(area);
+                empleado.setCargo(rs.getString("cargo"));
+                empleado.setSueldo(rs.getDouble("sueldo"));
+            }
+        }catch(Exception ex){
+            System.out.println("Error al buscar empleado por id: " + ex.getMessage());
+        }finally{
+            try{cs.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+            try{con.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+        }
+        return empleado;
     }
 
     @Override
-    public List<Empleado> listarTodas() {
-        return List.of();
+    public List<Empleado> listarTodos() {
+        List<Empleado> empleados = null;
+        try{
+            con = DBManager.getInstance().getConnection();
+            cs = con.prepareCall("{call LISTAR_EMPLEADOS_TODOS()}");
+            rs = cs.executeQuery();
+            while(rs.next()){
+                if(empleados == null) empleados = new ArrayList<>();
+                Empleado empleado = new Empleado();
+                empleado.setIdPersona(rs.getInt("id_persona"));
+                empleado.setDNI(rs.getString("DNI"));
+                empleado.setNombre(rs.getString("nombre"));
+                empleado.setApellidoPaterno(rs.getString("apellido_paterno"));
+                empleado.setGenero(rs.getString("genero").charAt(0));
+                empleado.setFechaNacimiento(rs.getDate("fecha_nacimiento"));
+                Area area = new Area();
+                area.setIdArea(rs.getInt("id_area"));
+                area.setNombre(rs.getString("nombre_area"));
+                empleado.setArea(area);
+                empleado.setCargo(rs.getString("cargo"));
+                empleado.setSueldo(rs.getDouble("sueldo"));
+                empleados.add(empleado);
+            }
+        }catch(Exception ex){
+            System.out.println("Error al listar empleados: " + ex.getMessage());
+        }finally{
+            try{cs.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+            try{con.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+        }
+        return empleados;
     }
 }

@@ -1,10 +1,14 @@
 package pe.edu.pucp.softprog.ventas.model;
+import pe.edu.pucp.softprog.almacen.model.Producto;
+
 import java.util.Date;
+import java.util.List;
 
 public class OrdenVenta {
     private int idOrdenVenta;
     private double total;
     private Date fechaHora;
+    private List<Producto> productos
     private boolean activo;
 
     public int getIdOrdenVenta() {

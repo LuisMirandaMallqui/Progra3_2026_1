@@ -120,12 +120,11 @@ public class AreaImpl implements AreaDAO {
     }
 
     @Override
-    public List<Area> listarTodas() {
+    public List<Area> listarTodos() {
         List<Area> areas = null;
         try {
             con = DBManager.getInstance().getConnection();
-            String sql = "SELECT id_area, nombre, activa FROM area " +
-                    "WHERE activa = 1";
+            String sql = "SELECT id_area, nombre, activa FROM area WHERE activa = 1";
             pst = con.prepareStatement(sql);
             rs = pst.executeQuery();
             while(rs.next()){

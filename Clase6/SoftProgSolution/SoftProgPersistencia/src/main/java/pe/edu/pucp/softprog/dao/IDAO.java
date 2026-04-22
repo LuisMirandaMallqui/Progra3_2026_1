@@ -9,5 +9,5 @@ public interface IDAO <T> {
     int modificar(T objeto);
     int eliminar(int id);
     T buscarPorId(int id);
-    List<T> listarTodas();
+    List<T> listarTodos();
 }

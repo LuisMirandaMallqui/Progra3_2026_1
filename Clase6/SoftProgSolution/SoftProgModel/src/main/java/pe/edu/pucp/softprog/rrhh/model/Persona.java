@@ -10,7 +10,7 @@ public class Persona {
     private Date fechaNacimiento;
 
     public Persona(){}
-    
+
     public Persona(String DNI, String nombre, String apellidoPaterno, char genero, Date fechaNacimiento) {
         this.DNI = DNI;
         this.nombre = nombre;

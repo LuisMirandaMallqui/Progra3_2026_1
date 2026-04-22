@@ -8,8 +8,11 @@ public class Empleado extends Persona{
     private double sueldo;
     private boolean activo;
 
-    public Empleado(String DNI, String nombre, String apellidoPaterno, char genero, Date fechaNacimiento, String cargo, double sueldo) {
+    public Empleado(){}
+
+    public Empleado(String DNI, String nombre, String apellidoPaterno, char genero, Date fechaNacimiento, Area area, String cargo, double sueldo) {
         super(DNI, nombre, apellidoPaterno, genero, fechaNacimiento);
+        this.area = area;
         this.cargo = cargo;
         this.sueldo = sueldo;
     }
@@ -38,11 +41,11 @@ public class Empleado extends Persona{
         this.activo = activo;
     }
 
-    public Area getArea(){
+    public Area getArea() {
         return area;
     }
 
-    public void setArea(Area area){
+    public void setArea(Area area) {
         this.area = area;
     }
 }

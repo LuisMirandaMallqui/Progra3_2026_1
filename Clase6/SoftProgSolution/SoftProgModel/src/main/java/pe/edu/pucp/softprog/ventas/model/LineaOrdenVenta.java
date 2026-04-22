@@ -1,10 +1,30 @@
 package pe.edu.pucp.softprog.ventas.model;
 
+import pe.edu.pucp.softprog.almacen.model.Producto;
+
 public class LineaOrdenVenta {
     private int idLineaOrdenVenta;
     private int cantidad;
     private double subtotal;
     private boolean activo;
+    private Producto producto;
+    private int cantidadUnidades;
+
+    public Producto getProducto() {
+        return producto;
+    }
+
+    public void setProducto(Producto producto) {
+        this.producto = producto;
+    }
+
+    public int getCantidadUnidades() {
+        return cantidadUnidades;
+    }
+
+    public void setCantidadUnidades(int cantidadUnidades) {
+        this.cantidadUnidades = cantidadUnidades;
+    }
 
     public int getIdLineaOrdenVenta() {
         return idLineaOrdenVenta;
