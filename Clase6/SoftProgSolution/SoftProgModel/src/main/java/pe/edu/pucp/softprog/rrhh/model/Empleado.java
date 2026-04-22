@@ -1,9 +1,18 @@
 package pe.edu.pucp.softprog.rrhh.model;
 
+import java.util.Date;
+
 public class Empleado extends Persona{
+    private Area area;
     private String cargo;
     private double sueldo;
     private boolean activo;
+
+    public Empleado(String DNI, String nombre, String apellidoPaterno, char genero, Date fechaNacimiento, String cargo, double sueldo) {
+        super(DNI, nombre, apellidoPaterno, genero, fechaNacimiento);
+        this.cargo = cargo;
+        this.sueldo = sueldo;
+    }
 
     public String getCargo() {
         return cargo;
@@ -27,5 +36,13 @@ public class Empleado extends Persona{
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public Area getArea(){
+        return area;
+    }
+
+    public void setArea(Area area){
+        this.area = area;
     }
 }
