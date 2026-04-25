@@ -9,20 +9,15 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>SoftProg</artifactId>
+    <artifactId>SoftProgNegocio</artifactId>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <!-- Source: https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
+
     <dependencies>
-        <dependency>
-            <groupId>pe.edu.pucp.softprog</groupId>
-            <artifactId>SoftProgDBManager</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>pe.edu.pucp.softprog</groupId>
             <artifactId>SoftProgModel</artifactId>
@@ -30,19 +25,9 @@
         </dependency>
         <dependency>
             <groupId>pe.edu.pucp.softprog</groupId>
-            <artifactId>SoftProgNegocio</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>pe.edu.pucp.softprog</groupId>
             <artifactId>SoftProgPersistencia</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>9.6.0</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
+
 </project>

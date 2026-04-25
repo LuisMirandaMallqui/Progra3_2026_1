@@ -4,11 +4,18 @@ import pe.edu.pucp.softprog.almacen.model.Producto;
 
 public class LineaOrdenVenta {
     private int idLineaOrdenVenta;
-    private int cantidad;
-    private double subtotal;
-    private boolean activo;
     private Producto producto;
     private int cantidadUnidades;
+    private double subtotal;
+    private boolean activo;
+
+    public int getIdLineaOrdenVenta() {
+        return idLineaOrdenVenta;
+    }
+
+    public void setIdLineaOrdenVenta(int idLineaOrdenVenta) {
+        this.idLineaOrdenVenta = idLineaOrdenVenta;
+    }
 
     public Producto getProducto() {
         return producto;
@@ -26,22 +33,6 @@ public class LineaOrdenVenta {
         this.cantidadUnidades = cantidadUnidades;
     }
 
-    public int getIdLineaOrdenVenta() {
-        return idLineaOrdenVenta;
-    }
-
-    public void setIdLineaOrdenVenta(int idLineaOrdenVenta) {
-        this.idLineaOrdenVenta = idLineaOrdenVenta;
-    }
-
-    public int getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
-    }
-
     public double getSubtotal() {
         return subtotal;
     }
@@ -56,5 +47,9 @@ public class LineaOrdenVenta {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public void calcularSubtotal(){
+        subtotal = cantidadUnidades * producto.getPrecio();
     }
 }

@@ -1,13 +1,11 @@
-CREATE SCHEMA IF NOT EXISTS `prog3` DEFAULT CHARACTER SET utf8mb3 ;
-USE `prog3` ;
-
 -- Eliminación de PROCEDIMIENTOS
-DROP TABLE IF EXISTS producto;
+DROP TABLE IF EXISTS linea_orden_venta;
+DROP TABLE IF EXISTS orden_venta;
 DROP TABLE IF EXISTS cliente;
 DROP TABLE IF EXISTS empleado;
 DROP TABLE IF EXISTS persona;
 DROP TABLE IF EXISTS area;
-DROP TABLE IF EXISTS linea
+DROP TABLE IF EXISTS producto;
 -- Creacion de TABLAS
 CREATE TABLE area(
 	id_area INT AUTO_INCREMENT,
@@ -41,18 +39,23 @@ CREATE TABLE cliente(
     PRIMARY KEY(id_cliente),
     FOREIGN KEY(id_cliente) REFERENCES persona(id_persona)
 )ENGINE=InnoDB;
-INSERT INTO area(nombre,activa) VALUES("CONTABILIDAD",1);
-CREATE TABLE produto(
+CREATE TABLE producto(
 	id_producto INT AUTO_INCREMENT,
     nombre VARCHAR(45),
     unidad_medida VARCHAR(30),
-    
+    precio DECIMAL(10,2),
+    activo TINYINT,
+    PRIMARY KEY(id_producto)
 )ENGINE=InnoDB;
 CREATE TABLE orden_venta(
 	id_orden_venta INT PRIMARY KEY AUTO_INCREMENT,
-	total DECIMAL(10,2),
+    fid_empleado INT,
+    fid_cliente INT,
+    total DECIMAL(10,2),
     fecha_hora DATETIME,
-    ativa TINYINT
+    activa TINYINT,
+    FOREIGN KEY (fid_empleado) REFERENCES empleado(id_empleado),
+    FOREIGN KEY (fid_cliente) REFERENCES cliente(id_cliente)
 )ENGINE=InnoDB;
 CREATE TABLE linea_orden_venta(
 	id_linea_orden_venta INT PRIMARY KEY AUTO_INCREMENT,
@@ -61,9 +64,10 @@ CREATE TABLE linea_orden_venta(
     cantidad_unidades INT,
     subtotal DECIMAL(10,2),
     activa TINYINT,
-    FOREIGN KEY (fid_)
-)ENGINE = InnoDB;
-
+    FOREIGN KEY (fid_orden_venta) REFERENCES orden_venta(id_orden_venta),
+    FOREIGN KEY (fid_producto) REFERENCES producto(id_producto)
+)ENGINE=InnoDB;
+INSERT INTO area(nombre,activa) VALUES("CONTABILIDAD",1);
 -- Eliminando procedimientos de area
 DROP PROCEDURE IF EXISTS INSERTAR_AREA;
 -- Eliminando procedimientos de empleado
@@ -78,22 +82,13 @@ DROP PROCEDURE IF EXISTS MODIFICAR_CLIENTE;
 DROP PROCEDURE IF EXISTS ELIMINAR_CLIENTE;
 DROP PROCEDURE IF EXISTS LISTAR_CLIENTES_TODOS;
 DROP PROCEDURE IF EXISTS LISTAR_CLIENTE_X_ID;
+-- Eliminando procedimientos de producto
+DROP PROCEDURE IF EXISTS LISTAR_PRODUCTOS_TODOS;
+-- Eliminando procedimientos de orden de venta
+DROP PROCEDURE IF EXISTS INSERTAR_ORDEN_VENTA;
+-- Eliminando procedimientos de linea de orden de venta
+DROP PROCEDURE IF EXISTS INSERTAR_LINEA_ORDEN_VENTA;
 -- Creando PROCEDIMIENTOS
-DELIMITER $
-CREATE PROCEDURE INSERTAR_ORDEN_VENTA(
-	OUT _id_orden_venta INT,
-    IN _fid_empleado INT,
-    IN _fid_cliente IN,
-	IN _total DECIMAL(10,2)
-)
-BEGIN 
-	INSERT INTO orden_venta(fid_empleado,fid_cliente,total,fecha_hora,activa) VALUES(_fid_empleado,fid_cliente,_total,NOW() - INTERVAL 5 HOUR,1);
-    SET _id_orden_vent = @@last_insert_id
-END$
-DELIMITER ;
-CREATE PROCEDURE LISTAR_PRODUCTOS_TODOS()
-BEGIN
-	SELECT id_producto,nombre 
 -- AREAS
 DELIMITER $
 CREATE PROCEDURE INSERTAR_AREA(
@@ -187,14 +182,44 @@ CREATE PROCEDURE LISTAR_CLIENTES_TODOS()
 BEGIN
 	SELECT p.id_persona, p.DNI, p.nombre, p.apellido_paterno, p.genero, p.fecha_nacimiento, c.linea_credito, c.categoria FROM persona p INNER JOIN cliente c ON p.id_persona = c.id_cliente;
 END$
-CREATE PROCEDURE LISTAR_CLIENTES_X_ID(
+CREATE PROCEDURE LISTAR_CLIENTE_X_ID(
 	IN _id_cliente INT
 )
 BEGIN
 	SELECT p.id_persona, p.DNI, p.nombre, p.apellido_paterno, p.genero, p.fecha_nacimiento, c.linea_credito, c.categoria FROM persona p INNER JOIN cliente c ON p.id_persona = c.id_cliente WHERE p.id_persona = _id_cliente;
 END$
+DELIMITER $
+CREATE PROCEDURE LISTAR_PRODUCTOS_TODOS()
+BEGIN
+	SELECT id_producto, nombre, unidad_medida, precio FROM producto where activo = 1;
+END$
+DELIMITER $
+DROP PROCEDURE IF EXISTS INSERTAR_ORDEN_VENTA$
+CREATE PROCEDURE INSERTAR_ORDEN_VENTA(
+	OUT _id_orden_venta INT,
+    IN _fid_empleado INT,
+    IN _fid_cliente INT,
+    IN _total DECIMAL(10,2)
+)
+BEGIN
+	INSERT INTO orden_venta(fid_empleado,fid_cliente,total,fecha_hora,activa) VALUES(_fid_empleado,_fid_cliente,_total,NOW() - INTERVAL 5 HOUR,1);
+    SET _id_orden_venta = @@last_insert_id;
+END$
+DELIMITER $
+CREATE PROCEDURE INSERTAR_LINEA_ORDEN_VENTA(
+	OUT _id_linea_orden_venta INT,
+    IN _fid_orden_venta INT,
+    IN _fid_producto INT,
+    IN _cantidad_unidades INT,
+    IN _subtotal DECIMAL(10,2)
+)
+BEGIN
+	INSERT INTO linea_orden_venta(fid_orden_venta,fid_producto,cantidad_unidades,subtotal,activa) VALUES(_fid_orden_venta, _fid_producto, _cantidad_unidades,_subtotal,1);
+END$
 DELIMITER ;
 -- Insertando registros
 CALL INSERTAR_AREA(@id,'BIENESTAR');
 
-INSERT INTO producto(nombre,unidad_medida,precio,activo) VALUES('GASEOSA INKA KOLA','1.5 LTS',4.5,1); 
+INSERT INTO producto(nombre,unidad_medida,precio,activo) VALUES('GASEOSA INKA KOLA','1.5 LTS',4.5,1);
+INSERT INTO producto(nombre,unidad_medida,precio,activo) VALUES('GASEOSA INKA KOLA','2.5 LTS',7.0,1);
+INSERT INTO producto(nombre,unidad_medida,precio,activo) VALUES('LAVAVAJILLAS SAPOLIO','500 GR',13.20,1);

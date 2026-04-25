@@ -13,6 +13,7 @@
         <module>SoftProg</module>
         <module>SoftProgDBManager</module>
         <module>SoftProgPersistencia</module>
+        <module>SoftProgNegocio</module>
     </modules>
 
     <properties>
