@@ -24,12 +24,12 @@ public class OrdenVentaImpl implements OrdenVentaDAO {
             con.setAutoCommit(false);
             cs = con.prepareCall("{call INSERTAR_ORDEN_VENTA(?,?,?,?)}");
             cs.registerOutParameter("_id_orden_venta", Types.INTEGER);
-            cs.setInt("_fid_empleado",ordenVenta.getEmpleado().getIdPersona());
-            cs.setInt("_fid_cliente",ordenVenta.getCliente().getIdPersona());
+            cs.setInt("_fid_empleado", ordenVenta.getEmpleado().getIdPersona());
+            cs.setInt("_fid_cliente", ordenVenta.getCliente().getIdPersona());
             cs.setDouble("_total", ordenVenta.getTotal());
             cs.executeUpdate();
             ordenVenta.setIdOrdenVenta(cs.getInt("_id_orden_venta"));
-            for(LineaOrdenVenta lov : ordenVenta.getLineasOrdenVenta()) {
+            for (LineaOrdenVenta lov : ordenVenta.getLineasOrdenVenta()) {
                 cs = con.prepareCall("{call INSERTAR_LINEA_ORDEN_VENTA(?,?,?,?,?)}");
                 cs.registerOutParameter("_id_linea_orden_venta", Types.INTEGER);
                 cs.setInt("_fid_orden_venta", ordenVenta.getIdOrdenVenta());
@@ -40,14 +40,21 @@ public class OrdenVentaImpl implements OrdenVentaDAO {
             }
             resultado = ordenVenta.getIdOrdenVenta();
             con.commit();
-        }catch(Exception ex){
-            try{con.rollback();}catch(Exception ex1){}
+        } catch (Exception ex) {
+            try {
+                con.rollback();
+            } catch (Exception ex1) {
+            }
             System.out.println("Error al insertar la orden de venta: " + ex.getMessage());
-        }finally{
-            try{cs.close();}catch(Exception ex){
+        } finally {
+            try {
+                cs.close();
+            } catch (Exception ex) {
                 System.out.println("ERROR: " + ex.getMessage());
             }
-            try{con.close();}catch(Exception ex){
+            try {
+                con.close();
+            } catch (Exception ex) {
                 System.out.println("ERROR: " + ex.getMessage());
             }
         }
