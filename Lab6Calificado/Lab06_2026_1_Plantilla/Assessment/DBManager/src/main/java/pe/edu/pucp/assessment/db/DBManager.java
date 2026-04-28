@@ -1,6 +1,4 @@
 package pe.edu.pucp.assessment.db;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,60 +6,70 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Map;
-import java.util.Properties;
+import java.util.ResourceBundle;
+
 public class DBManager {
-
+    private static Connection con;
     private static DBManager dbManager;
-    private Properties datos;
-    private final String url;
-    private final String user;
+    // Configuración
+    private final String hostname;
+    private final String esquema;
+    private final String puerto;
+    private final String usuario;
     private final String password;
-    private final String database;
-    private Connection con;
+    private final String url;
+    private final String tipoBD;
     private ResultSet rs;
-    private String ruta = "db.properties";
 
-    private DBManager(){
-        datos = new Properties();
-        try{
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(ruta);
-            datos.load(inputStream);
-        }catch(IOException ex){
-            System.out.println("Error leyendo el archivo de datos de conexion: " + ex.getMessage());
+    // Constructor privado (Singleton)
+    private DBManager() {
+        ResourceBundle db = ResourceBundle.getBundle("datos");
+        this.tipoBD = db.getString("db.tipoBD");
+        this.esquema = db.getString("db.esquema");
+        this.usuario = db.getString("db.usuario");
+        this.password = db.getString("db.password"); // O desencriptar si es necesario
+        // Construir URL según tipo de BD
+        if ("mysql".equalsIgnoreCase(this.tipoBD)) {
+            this.hostname = db.getString("db.hostnamemysql");
+            this.puerto = db.getString("db.puertomysql");
+            this.url = "jdbc:mysql://"
+                    + this.hostname
+                    + ":" + this.puerto
+                    + "/" + this.esquema
+                    + "?useSSL=false&serverTimezone=UTC";
+        } else if ("sqlserver".equalsIgnoreCase(this.tipoBD)) {
+            this.hostname = db.getString("db.hostnamemssql");
+            this.puerto = db.getString("db.puertomssql");
+            this.url = "jdbc:sqlserver://"
+                    + this.hostname
+                    + ":" + this.puerto
+                    + ";databaseName=" + this.esquema;
+                    //+ ";encrypt=false;trustServerCertificate=true;integratedSecurity=false";
+        } else {
+            throw new RuntimeException("Tipo de base de datos no soportado: " + this.tipoBD);
         }
-        this.database = datos.getProperty("database");
-        if(datos.getProperty("tipoBD").equals("mysql"))
-            this.url = "jdbc:mysql://" + datos.getProperty("hostnamemysql") + "/" + this.database;
-        else
-            this.url =
-                    "jdbc:sqlserver://"
-                            + datos.getProperty("hostnamemssql") +
-                            ";databaseName=" + this.database +
-                            ";encrypt=false;trustServerCertificate="
-                            + "true;integratedSecurity=false;";
+    }
 
-        this.user = datos.getProperty("usuario");
-        //this.password = Encriptamiento.desencriptar(datos.getProperty("passwordEncriptado"),datos.getProperty("key"));
-        this.password = datos.getProperty("passwordEncriptado");
+    public Connection getConnection(){
+        try{
+            if(con == null || con.isClosed()){
+                //Se registra el driver de conexión
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                //Se establece la conexión
+                con = DriverManager.getConnection(url, usuario,password);
+                System.out.println("Se ha realizado la conexion");
+            }
+        }catch(Exception ex){
+            System.out.println(ex.getStackTrace());
+            System.out.println("Error al conectarse con la BD: " + ex.getMessage());
+        }
+        return con;
     }
 
     public static DBManager getInstance(){
         if(dbManager == null)
             dbManager = new DBManager();
         return dbManager;
-    }
-
-    public Connection getConnection(){
-        try{
-            if(con == null || con.isClosed()){
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                con = DriverManager.getConnection(url,user,password);
-                System.out.println("Se ha establecido la conexion con la base de datos.");
-            }
-        }catch(ClassNotFoundException | SQLException ex){
-            System.out.println("Error al intentar conectar con la base de datos: " + ex.getMessage());
-        }
-        return con;
     }
 
     public void cerrarConexion(){
