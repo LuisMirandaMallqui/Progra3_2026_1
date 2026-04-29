@@ -9,10 +9,10 @@ public abstract class DaoImplBase {
 
     protected DBManager dbManager = DBManager.getInstance();
 
-    // Cada hijo dice qué SP usa para eliminar
+    // Cada dao determina su propia llamada para eliminar
     protected abstract String obtenerSPEliminar();
 
-    // Template method — el hijo hereda esto sin tocar nada
+    // Cada Dao hereda esto
     public int eliminar(int id) {
         Map<Integer, Object> parametrosEntrada = new HashMap<>();
         parametrosEntrada.put(1, id);

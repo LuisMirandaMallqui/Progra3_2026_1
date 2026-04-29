@@ -1,7 +1,6 @@
 package pe.edu.pucp.assessment.teacher.model;
 
 public class Teacher {
-
     private int idTeacher;
     private String pucpCode;
     private String firstName;
@@ -17,6 +16,7 @@ public class Teacher {
         this.lastName = lastName;
     }
 
+    // para el test de model
     public Teacher(String pucpCode, String firstName, String lastName) {
         this.pucpCode = pucpCode;
         this.firstName = firstName;
