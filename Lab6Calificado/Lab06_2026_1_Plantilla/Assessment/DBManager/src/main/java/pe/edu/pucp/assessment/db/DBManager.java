@@ -22,14 +22,6 @@ public class DBManager {
     private final String tipoBD;
     private ResultSet rs;
 
-    /*
-    De pedir doble conexión en simultaneo implementar
-    private final String hostnameMySQL;
-    private final String hostnameMSSQL;
-    private final String puertoMySQL;
-    private final String puertoMSSQL;
-     */
-
     // Constructor privado (Singleton)
     private DBManager(){
         ResourceBundle db = ResourceBundle.getBundle("datos");
