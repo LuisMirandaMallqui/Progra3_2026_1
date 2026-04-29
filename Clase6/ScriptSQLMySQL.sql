@@ -15,7 +15,7 @@ CREATE TABLE area(
 )ENGINE=InnoDB;
 CREATE TABLE persona(
 	id_persona INT AUTO_INCREMENT,
-    DNI VARCHAR(8),
+    DNI VARCHAR(8) UNIQUE,
     nombre VARCHAR(35),
     apellido_paterno VARCHAR(35),
     genero CHAR,
@@ -84,6 +84,9 @@ DROP PROCEDURE IF EXISTS LISTAR_CLIENTES_TODOS;
 DROP PROCEDURE IF EXISTS LISTAR_CLIENTE_X_ID;
 -- Eliminando procedimientos de producto
 DROP PROCEDURE IF EXISTS LISTAR_PRODUCTOS_TODOS;
+DROP PROCEDURE IF EXISTS INSERTAR_PRODUCTO;
+DROP PROCEDURE IF EXISTS MODIFICAR_PRODUCTO;
+DROP PROCEDURE IF EXISTS ELIMINAR_PRODUCTO;
 -- Eliminando procedimientos de orden de venta
 DROP PROCEDURE IF EXISTS INSERTAR_ORDEN_VENTA;
 -- Eliminando procedimientos de linea de orden de venta
@@ -141,6 +144,13 @@ CREATE PROCEDURE LISTAR_EMPLEADOS_TODOS(
 )
 BEGIN
 	SELECT p.id_persona, p.DNI, p.nombre, p.apellido_paterno, p.genero, p.fecha_nacimiento, a.id_area, a.nombre as nombre_area, e.cargo, e.sueldo FROM persona p INNER JOIN empleado e ON p.id_persona = e.id_empleado INNER JOIN area a ON e.fid_area = a.id_area WHERE e.activo = 1; 
+END$
+DELIMITER $
+CREATE PROCEDURE LISTAR_EMPLEADO_X_DNI(
+	IN _DNI VARCHAR(8)
+)
+BEGIN
+	SELECT p.id_persona, p.DNI, p.nombre, p.apellido_paterno, p.genero, p.fecha_nacimiento FROM persona p WHERE p.DNI = _DNI; 
 END$
 CREATE PROCEDURE LISTAR_EMPLEADO_X_ID(
 	IN _id_empleado INT
@@ -215,6 +225,32 @@ CREATE PROCEDURE INSERTAR_LINEA_ORDEN_VENTA(
 )
 BEGIN
 	INSERT INTO linea_orden_venta(fid_orden_venta,fid_producto,cantidad_unidades,subtotal,activa) VALUES(_fid_orden_venta, _fid_producto, _cantidad_unidades,_subtotal,1);
+END$
+DELIMITER $
+CREATE PROCEDURE INSERTAR_PRODUCTO(
+	OUT _id_producto INT,
+    IN _nombre VARCHAR(45),
+    IN _unidad_medida VARCHAR(30),
+    IN _precio DECIMAL(10,2)
+)
+BEGIN
+	INSERT INTO producto(nombre,unidad_medida,precio,activo) VALUES(_nombre,_unidad_medida,_precio,1);
+    SET _id_producto = @@last_insert_id;
+END$
+CREATE PROCEDURE MODIFICAR_PRODUCTO(
+	IN _id_producto INT,
+    IN _nombre VARCHAR(45),
+    IN _unidad_medida VARCHAR(30),
+    IN _precio DECIMAL(10,2)
+)
+BEGIN
+	UPDATE producto SET nombre = _nombre, unidad_medida = _unidad_medida, precio = _precio WHERE id_producto = _id_producto;
+END$
+CREATE PROCEDURE ELIMINAR_PRODUCTO(
+	IN _id_producto INT
+)
+BEGIN
+	UPDATE producto SET activo = 0 WHERE id_producto = _id_producto;
 END$
 DELIMITER ;
 -- Insertando registros

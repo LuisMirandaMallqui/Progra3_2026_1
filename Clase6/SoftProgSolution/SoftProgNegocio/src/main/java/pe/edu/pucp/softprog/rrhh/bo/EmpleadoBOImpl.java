@@ -19,6 +19,11 @@ public class EmpleadoBOImpl implements IEmpleadoBO {
     @Override
     public int insertar(Empleado empleado) throws Exception {
         validar(empleado, false);
+
+        if (daoEmpleado.existePorDNI(empleado.getDNI())) {
+            throw new Exception("El empleado ya está registrado.");
+        }
+
         return daoEmpleado.insertar(empleado);
     }
 

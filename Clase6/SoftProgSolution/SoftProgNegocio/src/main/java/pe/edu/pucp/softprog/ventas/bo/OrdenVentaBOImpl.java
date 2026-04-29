@@ -20,7 +20,6 @@ public class OrdenVentaBOImpl implements IOrdenVentaBO {
     @Override
     public int insertar(OrdenVenta ordenVenta) throws Exception {
         validar(ordenVenta, false);
-        //recalcularTotales(ordenVenta);
         return daoOrdenVenta.insertar(ordenVenta);
     }
 

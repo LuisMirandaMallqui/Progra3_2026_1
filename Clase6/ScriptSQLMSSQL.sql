@@ -1,0 +1,28 @@
+CREATE TABLE area(
+	id_area INT IDENTITY(1,1),
+	nombre VARCHAR(30),
+	activa TINYINT,
+	PRIMARY KEY(id_area)
+);
+GO
+
+INSERT INTO area(nombre,activa) VALUES('CONTABILIDAD',1);
+GO
+
+SELECT * FROM area;
+
+DROP PROCEDURE IF EXISTS INSERTAR_AREA;
+GO
+CREATE PROCEDURE INSERTAR_AREA
+	@_id_area INT OUTPUT,
+	@_nombre VARCHAR(30)
+AS
+BEGIN
+	INSERT INTO area(nombre,activa) VALUES (@_nombre,1);
+	SET @_id_area = @@IDENTITY;
+END
+GO
+
+DECLARE @_id_area AS INT;
+EXEC INSERTAR_AREA @_id_area,
+'FINANZAS';

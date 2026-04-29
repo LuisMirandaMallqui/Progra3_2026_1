@@ -17,8 +17,23 @@ public class EmpleadoImpl implements EmpleadoDAO {
     private CallableStatement cs;
 
     @Override
-    public List<Empleado> buscarPorDNI(String DNI) {
-        return List.of();
+    public boolean existePorDNI(String DNI) {
+        boolean resultado = false;
+        try{
+            con = DBManager.getInstance().getConnection();
+            cs = con.prepareCall("{call VERIFICAR_EMPLEADO_X_DNI(?)}");
+            cs.setString("_DNI", DNI);
+            rs = cs.executeQuery();
+            if(rs.next()){
+                resultado = true;
+            }
+        }catch(Exception ex){
+            System.out.println("Error al buscar empleado por id: " + ex.getMessage());
+        }finally{
+            try{cs.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+            try{con.close();}catch(Exception ex){System.out.println(ex.getMessage());}
+        }
+        return resultado;
     }
 
     @Override

@@ -13,7 +13,7 @@
         <module>Model</module>
         <module>Persistance</module>
         <module>Business</module>
-        <module>Principal</module>
+        <module>Main</module>
     </modules>
 
     <properties>

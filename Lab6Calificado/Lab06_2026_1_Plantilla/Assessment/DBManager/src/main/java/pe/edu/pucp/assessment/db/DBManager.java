@@ -11,43 +11,40 @@ import java.util.ResourceBundle;
 public class DBManager {
     private static Connection con;
     private static DBManager dbManager;
-    // Configuración
-    private final String hostname;
+    private final String hostnameMySQL;
+    private final String hostnameMSSQL;
     private final String esquema;
-    private final String puerto;
+    private final String puertoMySQL;
+    private final String puertoMSSQL;
     private final String usuario;
     private final String password;
-    private final String url;
+    private String url;
     private final String tipoBD;
     private ResultSet rs;
 
+    /*
+    De pedir doble conexión en simultaneo implementar
+    private final String hostnameMySQL;
+    private final String hostnameMSSQL;
+    private final String puertoMySQL;
+    private final String puertoMSSQL;
+     */
+
     // Constructor privado (Singleton)
-    private DBManager() {
+    private DBManager(){
         ResourceBundle db = ResourceBundle.getBundle("datos");
-        this.tipoBD = db.getString("db.tipoBD");
+        this.hostnameMySQL = db.getString("db.hostMySQL");
+        this.hostnameMSSQL = db.getString("db.hostMSSQL");
         this.esquema = db.getString("db.esquema");
+        this.puertoMySQL = db.getString("db.puertoMySQL");
+        this.puertoMSSQL = db.getString("db.puertoMSSQL");
         this.usuario = db.getString("db.usuario");
-        this.password = db.getString("db.password"); // O desencriptar si es necesario
-        // Construir URL según tipo de BD
-        if ("mysql".equalsIgnoreCase(this.tipoBD)) {
-            this.hostname = db.getString("db.hostnamemysql");
-            this.puerto = db.getString("db.puertomysql");
-            this.url = "jdbc:mysql://"
-                    + this.hostname
-                    + ":" + this.puerto
-                    + "/" + this.esquema
-                    + "?useSSL=false&serverTimezone=UTC";
-        } else if ("sqlserver".equalsIgnoreCase(this.tipoBD)) {
-            this.hostname = db.getString("db.hostnamemssql");
-            this.puerto = db.getString("db.puertomssql");
-            this.url = "jdbc:sqlserver://"
-                    + this.hostname
-                    + ":" + this.puerto
-                    + ";databaseName=" + this.esquema;
-                    //+ ";encrypt=false;trustServerCertificate=true;integratedSecurity=false";
-        } else {
-            throw new RuntimeException("Tipo de base de datos no soportado: " + this.tipoBD);
-        }
+        this.password = db.getString("db.password");
+        this.tipoBD = db.getString("db.type");
+        if(this.tipoBD.equals("mysql"))
+            this.url = "jdbc:mysql://" + this.hostnameMySQL + ":" + this.puertoMySQL + "/" + this.esquema;
+        else if(this.tipoBD.equals("mssql"))
+            this.url = "jdbc:sqlserver://" + this.hostnameMSSQL + ":" + this.puertoMSSQL + ";databaseName=" +  this.esquema +";encrypt=false;trustServerCertificate=true;integratedSecurity=false;";
     }
 
     public Connection getConnection(){

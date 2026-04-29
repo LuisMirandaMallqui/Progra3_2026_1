@@ -20,18 +20,13 @@ public class AreaImpl implements AreaDAO {
     public int insertar(Area area) {
         int resultado = 0;
         try {
-            /**
-            con = DBManager.getInstance().getConnection();
-            String sql = "INSERT INTO area(nombre, activa) VALUES (?,1)";
-            pst = con.prepareStatement(sql);
-            pst.setString(1,area.getNombre());
-            resultado = pst.executeUpdate();**/
             con = DBManager.getInstance().getConnection();
             cs = con.prepareCall("{call INSERTAR_AREA(?,?)}");
             cs.registerOutParameter("_id_area", Types.INTEGER);
             cs.setString("_nombre",area.getNombre());
             cs.executeUpdate();
-            resultado = cs.getInt("_id_area");
+            area.setIdArea(cs.getInt("_id_area"));
+            resultado = area.getIdArea();
         }catch(Exception ex){
             System.out.println("ERROR: " + ex.getMessage());
         }finally{

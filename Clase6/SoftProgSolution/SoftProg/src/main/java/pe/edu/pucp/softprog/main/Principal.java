@@ -40,19 +40,40 @@ import pe.edu.pucp.softprog.rrhh.model.Empleado;
 
 public class Principal {
     public static void main(String[] args) throws Exception{
+
+        ProductoDAO daoProducto = new ProductoImpl();
+        Producto p = new Producto();
+        p.setNombre("PRODUCTO 1");
+        p.setUnidadMedida("UNIDAD MEDIDA");
+        p.setPrecio(2.39);
+        int resultado = daoProducto.insertar(p);
+        if(resultado != 0)
+            System.out.println("Se ha registrado con exito");
+        /**
+        IAreaBO areaBO = new AreaBOImpl();
+        Area area = new Area("RECURSOS HUMANOS");
+
+
+        int resultado = areaBO.insertar(area);
+        if(resultado != 0)
+            System.out.println("Se registro con exito...");
+        System.out.println(area.getIdArea());
         SimpleDateFormat formato = new SimpleDateFormat("dd-MM-yyyy");
 
-        IAreaBO areaBO = new AreaBOImpl();
-        Area area = areaBO.buscarPorId(1);
-        Empleado empleado = new Empleado("16527933",
+        //IAreaBO areaBO = new AreaBOImpl();
+        //Area area = areaBO.buscarPorId(1);
+
+        Empleado empleado = new Empleado("16527935",
                 "MANUEL","TUPIA",'M',
                 formato.parse("01-03-1977"),area,
                 "JEFE DE VENTAS",1500.00);
 
         IEmpleadoBO empleadoBO = new EmpleadoBOImpl();
-        int resultado = empleadoBO.insertar(empleado);
+        resultado = empleadoBO.insertar(empleado);
         if(resultado!=0)
             System.out.println("Se ha registrado con exito");
+        */
+        /**
         resultado = empleadoBO.modificar(empleado);
         if(resultado!=0)
             System.out.println("Se ha modificado con exito");
@@ -104,6 +125,6 @@ public class Principal {
         resultado = ordenVentaBO.insertar(ov);
         if(resultado!=0)
             System.out.println("La orden de venta se ha registrado");
-
+        */
     }
 }

@@ -7,5 +7,5 @@ import pe.edu.pucp.softprog.rrhh.model.Empleado;
 import java.util.List;
 
 public interface EmpleadoDAO extends IDAO<Empleado> {
-    List<Empleado> buscarPorDNI(String DNI);
+    boolean existePorDNI(String DNI);
 }
