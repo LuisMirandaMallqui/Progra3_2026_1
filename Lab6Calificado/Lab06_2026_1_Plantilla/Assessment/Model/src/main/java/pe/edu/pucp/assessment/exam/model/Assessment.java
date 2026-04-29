@@ -8,6 +8,7 @@ import pe.edu.pucp.assessment.teacher.model.Teacher;
 
 public class Assessment {
 
+    private int idAssessment;
     private int durationInMinutes;
     private Date startDate;
     private List<Teacher> teachers;
@@ -19,11 +20,28 @@ public class Assessment {
         this.assessmentItems = new ArrayList<AssessmentItem>();
     }
 
+    public Assessment(int idAssessment, int durationInMinutes, Date startDate, double finalScore) {
+        this.idAssessment = idAssessment;
+        this.durationInMinutes = durationInMinutes;
+        this.startDate = startDate;
+        this.finalScore = finalScore;
+        this.teachers = new ArrayList<Teacher>();
+        this.assessmentItems = new ArrayList<AssessmentItem>();
+    }
+
     public Assessment(int durationInMinutes, Date startDate, List<Teacher> teachers, List<AssessmentItem> assessmentItems) {
         this.durationInMinutes = durationInMinutes;
         this.startDate = startDate;
         this.teachers = teachers;
         this.assessmentItems = assessmentItems;
+    }
+
+    public int getIdAssessment() {
+        return idAssessment;
+    }
+
+    public void setIdAssessment(int idAssessment) {
+        this.idAssessment = idAssessment;
     }
 
     public int getDurationInMinutes() {

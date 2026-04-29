@@ -2,6 +2,7 @@ package pe.edu.pucp.assessment.teacher.model;
 
 public class Teacher {
 
+    private int idTeacher;
     private String pucpCode;
     private String firstName;
     private String lastName;
@@ -9,10 +10,25 @@ public class Teacher {
     public Teacher() {
     }
 
+    public Teacher(int idTeacher, String pucpCode, String firstName, String lastName) {
+        this.idTeacher = idTeacher;
+        this.pucpCode = pucpCode;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public Teacher(String pucpCode, String firstName, String lastName) {
         this.pucpCode = pucpCode;
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public int getIdTeacher() {
+        return idTeacher;
+    }
+
+    public void setIdTeacher(int idTeacher) {
+        this.idTeacher = idTeacher;
     }
 
     public String getPucpCode() {
@@ -38,5 +54,4 @@ public class Teacher {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-
 }
