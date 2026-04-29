@@ -16,17 +16,17 @@ public abstract class Question implements Printable{
         this.code = code;
     }
 
-    public void setPrompt(String prompt) {
-        this.prompt = prompt;
-    }
-
     public int getCode() {
         return code;
+    }
+
+    public void setPrompt(String prompt) {
+        this.prompt = prompt;
     }
 
     public String getPrompt() {
         return prompt;
     }
-	
+
 	public abstract String devolverDatos();
 }
