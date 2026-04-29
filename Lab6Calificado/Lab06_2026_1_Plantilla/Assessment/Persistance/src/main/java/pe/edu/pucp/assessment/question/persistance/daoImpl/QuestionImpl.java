@@ -4,9 +4,7 @@ import pe.edu.pucp.assessment.dao.persistance.DaoImplBase;
 import pe.edu.pucp.assessment.question.model.Question;
 import pe.edu.pucp.assessment.question.persistance.dao.QuestionDao;
 
-import java.sql.ResultSet;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
