@@ -43,17 +43,10 @@ public class ExamenBOImpl implements  ExamenBO{
     }
 
     public void crearExamenConPreguntas(Alumno alumno, String cadena, List<Pregunta> preguntasSeleccionadas){
+        //EXAMEN y ALUMNO
         Examen examen = new Examen(alumno,cadena,preguntasSeleccionadas);
         examenDAO = new ExamenImpl();
-
         int idExamen = examenDAO.insertar(examen);
-        // recuperar de una Id y Fecha en el ObjetoModel
-        examen = examenDAO.buscarPorId(idExamen);
         System.out.println("Examen creado: " + examen.getId() + " - Fecha: " + examen.getFechaCreacion());
-
-
-        PreguntaDAO preguntaDAO = new PreguntaImpl();
-
-
     }
 }

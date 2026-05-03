@@ -43,7 +43,7 @@ public class ExamenImpl extends DaoImplBase implements ExamenDAO {
             parametrosSalida.put(4, Types.INTEGER);
             dbManager.ejecutarProcedimiento("insertar_examen_pregunta",
                     parametrosEntrada, parametrosSalida);
-            pregunta.setId((int) parametrosSalida.get(1));
+//            pregunta.setId((int) parametrosSalida.get(4));
             orden++;
         }
 
@@ -92,49 +92,35 @@ public class ExamenImpl extends DaoImplBase implements ExamenDAO {
     @Override
     public List<Examen> listarTodos() {
         List<Examen> lista = null;
+        List<Integer> idsAlumno = new ArrayList<>();
+
+        // Fase 1: solo leer del ResultSet, nada más
         ResultSet rs = dbManager.ejecutarProcedimientoLectura(
                 "listar_examenes", null);
         try {
             while (rs != null && rs.next()) {
-                if (lista == null) lista = new ArrayList<>();//Lo pongo acá para no hacer un new en caso el resultSet llegue mal
+                if (lista == null) lista = new ArrayList<>();
                 Examen e = new Examen();
                 e.setId(rs.getInt("id"));
                 e.setTitulo(rs.getString("titulo"));
-                e.setFechaCreacion(rs.getDate("final_score"));
-                // PREGUNTAS
-                List<Pregunta> preguntas = new ArrayList<Pregunta>();
-                preguntas = listarPreguntasPorExamen(e.getId());
-                e.setPreguntas(preguntas);
-                //
-                // ALUMNO
-                //FORMA 1
-                Alumno a = null;
-                Map<Integer, Object> parametrosEntrada = new HashMap<>();
-                parametrosEntrada.put(1, rs.getInt("id_alumno"));
-                rs = dbManager.ejecutarProcedimientoLectura(
-                        "buscar_alumno_por_id", parametrosEntrada);
-                try {
-                    if (rs != null && rs.next()) {
-                        a = new Alumno();
-                        a.setId(rs.getInt("id"));
-                        a.setCodigo(rs.getString("codigo"));
-                        a.setCorreo(rs.getString("correo"));
-                        a.setNombre(rs.getString("nombre"));
-                    }
-                } catch (Exception ex) {
-                    System.out.println("Error al buscar teacher: " + ex.getMessage());
-                }
-                //FORMA 2
-//                AlumnoDAO alumnoDAO = new AlumnoImpl();
-//                a = alumnoDAO.buscarPorId(rs.getInt("id_alumno"));
-//                //
-                e.setAlumno(a);
+                e.setFechaCreacion(rs.getDate("fecha_creacion"));
+                idsAlumno.add(rs.getInt("id_alumno"));
                 lista.add(e);
             }
         } catch (Exception ex) {
-            System.out.println("Error al listar assessments: " + ex.getMessage());
+            System.out.println("Error al listar examen: " + ex.getMessage());
         } finally {
             dbManager.cerrarConexion();
+        }
+
+        // Fase 2: cargar relaciones
+        if (lista != null) {
+            AlumnoDAO alumnoDAO = new AlumnoImpl();
+            for (int i = 0; i < lista.size(); i++) {
+                Examen e = lista.get(i);
+                e.setPreguntas(listarPreguntasPorExamen(e.getId()));
+                e.setAlumno(alumnoDAO.buscarPorId(idsAlumno.get(i)));
+            }
         }
         return lista;
     }
