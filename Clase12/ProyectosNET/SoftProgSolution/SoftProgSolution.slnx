@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="SoftProg/SoftProg.csproj" />
   <Project Path="SoftProgDBManager/SoftProgDBManager.csproj" />
   <Project Path="SoftProgModel/SoftProgModel.csproj" />
+  <Project Path="SoftProgPersistencia/SoftProgPersistencia.csproj" />
 </Solution>
