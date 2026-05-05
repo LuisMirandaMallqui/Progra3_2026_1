@@ -8,10 +8,9 @@ import java.util.Date;
 import java.util.List;
 
 public class Examen {
-    private int id;
-    private Date fechaCreacion;
-    private int id_alumno;
-    //private Alumno alumno;
+    private int id; //se llena por la bd
+    private Date fechaCreacion; // se llena por la bd
+    private Alumno alumno;
     private String titulo;
     private List<Pregunta> preguntas;
 
@@ -19,16 +18,8 @@ public class Examen {
         preguntas = new ArrayList<Pregunta>();
     }
 
-    public Examen(int id, Date fechaCreacion, int id_alumno, String titulo, List<Pregunta> preguntas) {
-        this.id = id;
-        this.fechaCreacion = fechaCreacion;
-        this.id_alumno = id_alumno;
-        this.titulo = titulo;
-        this.preguntas = preguntas;
-    }
-
-    public Examen(int id_alumno, String titulo, List<Pregunta> preguntas) {
-        this.id_alumno = id_alumno;
+    public Examen(Alumno alumno, String titulo, List<Pregunta> preguntas) {
+        this.alumno = alumno;
         this.titulo = titulo;
         this.preguntas = preguntas;
     }
