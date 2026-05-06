@@ -1,6 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 
-namespace SoftProgDBManager
+namespace CinestarDBManager
 {
     public class DBManager
     {
@@ -14,8 +14,9 @@ namespace SoftProgDBManager
 
         public static void Initialize(string connectionString)
         {
-            if(_instance == null)
+            if (_instance == null) { 
                 _instance = new DBManager(connectionString);
+            }
         }
 
         public static DBManager Instance
@@ -23,8 +24,7 @@ namespace SoftProgDBManager
             get { return _instance; }
         }
 
-        public MySqlConnection GetConnection()
-        {
+        public MySqlConnection GetConnection() { 
             return new MySqlConnection(_connectionString);
         }
     }

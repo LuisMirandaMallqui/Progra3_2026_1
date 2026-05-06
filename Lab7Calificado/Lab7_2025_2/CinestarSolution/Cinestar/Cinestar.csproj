@@ -16,14 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoftProgDBManager\SoftProgDBManager.csproj" />
-    <ProjectReference Include="..\SoftProgModel\SoftProgModel.csproj" />
-    <ProjectReference Include="..\SoftProgNegocio\SoftProgNegocio.csproj" />
+    <ProjectReference Include="..\CinestarBusiness\CinestarBusiness.csproj" />
+    <ProjectReference Include="..\CinestarDBManager\CinestarDBManager.csproj" />
+    <ProjectReference Include="..\CinestarModel\CinestarModel.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

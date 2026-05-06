@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Cliente\BOI\" />
+    <Folder Include="Cliente\BO\" />
+    <Folder Include="Pelicula\BOI\" />
+    <Folder Include="Pelicula\BO\" />
+    <Folder Include="Sucursal\BOI\" />
+    <Folder Include="Sucursal\BO\" />
+    <Folder Include="Venta\BOI\" />
+    <Folder Include="Venta\BO\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CinestarModel\CinestarModel.csproj" />
+    <ProjectReference Include="..\CinestarPersistance\CinestarPersistance.csproj" />
+  </ItemGroup>
+
+</Project>

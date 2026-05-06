@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Cinestar/Cinestar.csproj" />
+  <Project Path="CinestarBusiness/CinestarBusiness.csproj" Id="9090711f-727f-495d-99f0-4e9b73cbc3fc" />
+  <Project Path="CinestarDBManager/CinestarDBManager.csproj" />
+  <Project Path="CinestarModel/CinestarModel.csproj" />
+  <Project Path="CinestarPersistance/CinestarPersistance.csproj" Id="c72ba5f0-2e2a-4ac3-85fe-1cc958aaa0e2" />
+</Solution>
