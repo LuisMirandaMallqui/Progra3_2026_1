@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="PokemonSoftApp/PokemonSoftApp.csproj" />
+  <Project Path="PokeSoftBusiness/PokeSoftBusiness.csproj" Id="ba90dbb6-928a-49c2-8e6d-f991de58cba1" />
+  <Project Path="PokeSoftDBManager/PokeSoftDBManager.csproj" Id="4b9f0c28-795f-4931-886b-b4134edd6e57" />
+  <Project Path="PokeSoftModel/PokeSoftModel.csproj" />
+  <Project Path="PokeSoftPersistance/PokeSoftPersistance.csproj" Id="3257f3cf-6f48-439c-94d3-b22e83d6ed47" />
+</Solution>
