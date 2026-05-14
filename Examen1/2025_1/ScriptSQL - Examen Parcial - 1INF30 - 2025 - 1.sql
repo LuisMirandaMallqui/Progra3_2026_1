@@ -1,0 +1,307 @@
+-- Creación de TABLAS - EXAMEN PARCIAL - 1INF30 - PROGRAMACION 3
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema p3_parcial
+-- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `p3_parcial` ;
+
+-- -----------------------------------------------------
+-- Schema p3_parcial
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `p3_parcial` DEFAULT CHARACTER SET utf8 ;
+USE `p3_parcial` ;
+
+-- -----------------------------------------------------
+-- Table `p3_parcial`.`EX1_TIPOS_LICENCIAS`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `p3_parcial`.`EX1_TIPOS_LICENCIAS` ;
+
+CREATE TABLE IF NOT EXISTS `p3_parcial`.`EX1_TIPOS_LICENCIAS` (
+  `TIPO_LICENCIA_ID` INT NOT NULL,
+  `NOMBRE` VARCHAR(45) NOT NULL,
+  `DESCRIPCION` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`TIPO_LICENCIA_ID`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `p3_parcial`.`EX1_CONDUCTORES`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `p3_parcial`.`EX1_CONDUCTORES` ;
+
+CREATE TABLE IF NOT EXISTS `p3_parcial`.`EX1_CONDUCTORES` (
+  `CONDUCTOR_ID` INT NOT NULL AUTO_INCREMENT,
+  `PATERNO` VARCHAR(45) NOT NULL,
+  `MATERNO` VARCHAR(45) NULL,
+  `NOMBRES` VARCHAR(45) NOT NULL,
+  `NUM_LICENCIA` VARCHAR(45) NOT NULL,
+  `TIPO_LICENCIA_ID` INT NOT NULL,
+  `PUNTOS_ACUMULADOS` INT NOT NULL,
+  PRIMARY KEY (`CONDUCTOR_ID`),
+  INDEX `fk_EX1_CONDUCTORES_EX1_TIPOS_LICENCIAS_idx` (`TIPO_LICENCIA_ID` ASC) VISIBLE,
+  CONSTRAINT `fk_EX1_CONDUCTORES_EX1_TIPOS_LICENCIAS`
+    FOREIGN KEY (`TIPO_LICENCIA_ID`)
+    REFERENCES `p3_parcial`.`EX1_TIPOS_LICENCIAS` (`TIPO_LICENCIA_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `p3_parcial`.`EX1_VEHICULOS`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `p3_parcial`.`EX1_VEHICULOS` ;
+
+CREATE TABLE IF NOT EXISTS `p3_parcial`.`EX1_VEHICULOS` (
+  `VEHICULO_ID` INT NOT NULL AUTO_INCREMENT,
+  `PLACA` CHAR(7) NOT NULL,
+  `MARCA` VARCHAR(45) NOT NULL,
+  `MODELO` VARCHAR(45) NOT NULL,
+  `ANHO` INT NOT NULL,
+  PRIMARY KEY (`VEHICULO_ID`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `p3_parcial`.`EX1_INFRACCIONES`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `p3_parcial`.`EX1_INFRACCIONES` ;
+
+CREATE TABLE IF NOT EXISTS `p3_parcial`.`EX1_INFRACCIONES` (
+  `INFRACCION_ID` INT NOT NULL,
+  `DESCRIPCION` VARCHAR(45) NOT NULL,
+  `MONTO_MULTA` DECIMAL(10,3) NOT NULL,
+  `GRAVEDAD` ENUM('LEVE', 'GRAVE', 'MUY_GRAVE') NOT NULL,
+  `PUNTOS` INT NOT NULL,
+  PRIMARY KEY (`INFRACCION_ID`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `p3_parcial`.`EX1_REPORTES_INFRACCIONES`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `p3_parcial`.`EX1_REPORTES_INFRACCIONES` ;
+
+CREATE TABLE IF NOT EXISTS `p3_parcial`.`EX1_REPORTES_INFRACCIONES` (
+  `REPORTE_ID` INT NOT NULL AUTO_INCREMENT,
+  `CONDUCTOR_ID` INT NOT NULL,
+  `PATERNO` VARCHAR(45) NOT NULL,
+  `MATERNO` VARCHAR(45) NULL,
+  `NOMBRES` VARCHAR(45) NOT NULL,
+  `VEHICULO_ID` INT NOT NULL,
+  `PLACA` CHAR(7) NOT NULL,
+  `MARCA` VARCHAR(45) NOT NULL,
+  `MODELO` VARCHAR(45) NOT NULL,
+  `ANHO` INT NOT NULL,
+  `INFRACCION_ID` INT NOT NULL,
+  `DESCRIPCION` VARCHAR(255) NOT NULL,
+  `MONTO` DECIMAL(10,3) NOT NULL,
+  `GRAVEDAD` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`REPORTE_ID`),
+  INDEX `fk_EX1_REPORTES_INFRACCIONES_EX1_CONDUCTORES1_idx` (`CONDUCTOR_ID` ASC) VISIBLE,
+  INDEX `fk_EX1_REPORTES_INFRACCIONES_EX1_VEHICULOS1_idx` (`VEHICULO_ID` ASC) VISIBLE,
+  INDEX `fk_EX1_REPORTES_INFRACCIONES_EX1_INFRACCIONES1_idx` (`INFRACCION_ID` ASC) VISIBLE,
+  CONSTRAINT `fk_EX1_REPORTES_INFRACCIONES_EX1_CONDUCTORES1`
+    FOREIGN KEY (`CONDUCTOR_ID`)
+    REFERENCES `p3_parcial`.`EX1_CONDUCTORES` (`CONDUCTOR_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_EX1_REPORTES_INFRACCIONES_EX1_VEHICULOS1`
+    FOREIGN KEY (`VEHICULO_ID`)
+    REFERENCES `p3_parcial`.`EX1_VEHICULOS` (`VEHICULO_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_EX1_REPORTES_INFRACCIONES_EX1_INFRACCIONES1`
+    FOREIGN KEY (`INFRACCION_ID`)
+    REFERENCES `p3_parcial`.`EX1_INFRACCIONES` (`INFRACCION_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `p3_parcial`.`EX1_VEHICULOS_POR_CONDUCTOR`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `p3_parcial`.`EX1_VEHICULOS_POR_CONDUCTOR` ;
+
+CREATE TABLE IF NOT EXISTS `p3_parcial`.`EX1_VEHICULOS_POR_CONDUCTOR` (
+  `VEHICULO_ID` INT NOT NULL,
+  `CONDUCTOR_ID` INT NOT NULL,
+  `FECHA_ADQUISICION` DATE NOT NULL,
+  PRIMARY KEY (`VEHICULO_ID`, `CONDUCTOR_ID`),
+  INDEX `fk_EX1_VEHICULOS_POR_CONDUCTOR_EX1_VEHICULOS1_idx` (`VEHICULO_ID` ASC) VISIBLE,
+  CONSTRAINT `fk_EX1_VEHICULOS_POR_CONDUCTOR_EX1_CONDUCTORES1`
+    FOREIGN KEY (`CONDUCTOR_ID`)
+    REFERENCES `p3_parcial`.`EX1_CONDUCTORES` (`CONDUCTOR_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_EX1_VEHICULOS_POR_CONDUCTOR_EX1_VEHICULOS1`
+    FOREIGN KEY (`VEHICULO_ID`)
+    REFERENCES `p3_parcial`.`EX1_VEHICULOS` (`VEHICULO_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `p3_parcial`.`EX1_REGISTRO_INFRACCIONES`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `p3_parcial`.`EX1_REGISTRO_INFRACCIONES` ;
+
+CREATE TABLE IF NOT EXISTS `p3_parcial`.`EX1_REGISTRO_INFRACCIONES` (
+  `FECHA` DATE NOT NULL,
+  `VEHICULO_ID` INT NOT NULL,
+  `CONDUCTOR_ID` INT NOT NULL,
+  `INFRACCION_ID` INT NOT NULL,
+  PRIMARY KEY (`FECHA`, `VEHICULO_ID`, `CONDUCTOR_ID`, `INFRACCION_ID`),
+  INDEX `fk_EX1_REGISTRO_INFRACCIONES_EX1_INFRACCIONES1_idx` (`INFRACCION_ID` ASC) VISIBLE,
+  CONSTRAINT `fk_EX1_REGISTRO_INFRACCIONES_EX1_VEHICULOS_POR_CONDUCTOR1`
+    FOREIGN KEY (`VEHICULO_ID` , `CONDUCTOR_ID`)
+    REFERENCES `p3_parcial`.`EX1_VEHICULOS_POR_CONDUCTOR` (`VEHICULO_ID` , `CONDUCTOR_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_EX1_REGISTRO_INFRACCIONES_EX1_INFRACCIONES1`
+    FOREIGN KEY (`INFRACCION_ID`)
+    REFERENCES `p3_parcial`.`EX1_INFRACCIONES` (`INFRACCION_ID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- Registros
+USE p3_parcial;
+-- Script con registros
+-- Inserción de tipos de licencias
+INSERT INTO EX1_TIPOS_LICENCIAS (TIPO_LICENCIA_ID, NOMBRE, DESCRIPCION) VALUES 
+(1, 'A-I', 'Permite manejar autos particulares como sedanes, SUV, pickups y furgones.'),
+(2, 'A-IIa', 'Incluye A-I y también taxis, buses, ambulancias y transporte interprovincial.'),
+(3, 'A-IIb', 'Incluye A-I y A-IIa, además de microbuses de hasta 16 asientos y minibuses hasta 33 asientos.'),
+(4, 'A-IIIa', 'Incluye A-I, A-IIa y A-IIb; además permite manejar ómnibus urbanos e interurbanos.'),
+(5, 'A-IIIb', 'Incluye A-I, A-IIa y A-IIb, además de chasis cabinado, remolques, grúas y volquetes.'),
+(6, 'A-IIIc', 'Permite manejar todos los vehículos de las categorías anteriores.'),
+(7, 'B-I', 'Triciclos no motorizados de transporte público especial.'),
+(8, 'B-IIa', 'Bicimotos destinadas al transporte de pasajeros o mercancías.'),
+(9, 'B-IIb', 'Incluye B-IIa y motocicletas de dos ruedas o motocicletas con sidecar.'),
+(10, 'B-IIc', 'Incluye B-IIa y B-IIb, además de mototaxis y trimotos para transporte de pasajeros.');
+
+-- Inserción de conductores
+INSERT INTO EX1_CONDUCTORES (PATERNO, MATERNO, NOMBRES, NUM_LICENCIA, TIPO_LICENCIA_ID, PUNTOS_ACUMULADOS) VALUES
+('GARCIA', 'PEREZ', 'JUAN CARLOS', 'Q45678912', 1, 0),
+('MARTINEZ', 'RODRIGUEZ', 'ANA MARIA', 'W78945612', 2, 5),
+('LOPEZ', NULL, 'PEDRO PABLO', 'E12345678', 3, 8),
+('TORRES', 'VARGAS', 'MARIA ELENA', 'R98765432', 4, 2),
+('RAMIREZ', 'SILVA', 'JOSE LUIS', 'T45612378', 5, 15),
+('FLORES', 'CASTRO', 'CARMEN ROSA', 'Y78912345', 6, 0),
+('DIAZ', 'MENDOZA', 'MIGUEL ANGEL', 'U14725836', 7, 4),
+('CHAVEZ', 'RIOS', 'LAURA BEATRIZ', 'I36925814', 8, 6),
+('SANCHEZ', 'ORTIZ', 'CARLOS ALBERTO', 'O25836914', 9, 12),
+('MORALES', 'CRUZ', 'PATRICIA ELENA', 'P74185296', 10, 3);
+
+-- Inserción de vehículos
+INSERT INTO EX1_VEHICULOS (PLACA, MARCA, MODELO, ANHO) VALUES
+('ABC-123', 'TOYOTA', 'COROLLA', 2022),
+('DEF-456', 'HYUNDAI', 'TUCSON', 2021),
+('GHI-789', 'NISSAN', 'SENTRA', 2023),
+('JKL-012', 'KIA', 'SPORTAGE', 2022),
+('MNO-345', 'VOLKSWAGEN', 'GOL', 2021),
+('PQR-678', 'CHEVROLET', 'SAIL', 2023),
+('STU-901', 'SUZUKI', 'SWIFT', 2022),
+('VWX-234', 'HONDA', 'CIVIC', 2021),
+('YZA-567', 'MAZDA', 'CX-30', 2023),
+('BCD-890', 'MITSUBISHI', 'L200', 2022);
+
+-- Relacionar vehículos con conductores (EX1_VEHICULOS_POR_CONDUCTOR)
+INSERT INTO EX1_VEHICULOS_POR_CONDUCTOR (VEHICULO_ID, CONDUCTOR_ID, FECHA_ADQUISICION) VALUES
+(1, 1, '2022-01-15'),  
+(2, 1, '2021-12-10'),  
+(2, 2, '2021-06-20'),  
+(3, 3, '2023-03-10'),  
+(4, 3, '2022-10-15'),  
+(4, 4, '2022-08-25'),  
+(5, 5, '2021-11-30'),  
+(6, 5, '2023-01-08'),  
+(6, 6, '2023-02-05'),  
+(7, 7, '2022-07-12'),  
+(8, 7, '2021-08-20'),
+(8, 8, '2021-09-18'),  
+(9, 9, '2023-01-22'),  
+(10, 10, '2022-04-28');
+
+-- Inserción de infracciones
+INSERT INTO EX1_INFRACCIONES (INFRACCION_ID, DESCRIPCION, MONTO_MULTA, GRAVEDAD, PUNTOS) VALUES
+(1, 'Conducir con exceso de velocidad', 950.00, 'GRAVE', 50),
+(2, 'Conducir en estado de ebriedad', 4300.00, 'MUY_GRAVE', 100),
+(3, 'Estacionar en zona rígida', 240.00, 'LEVE', 20),
+(4, 'No usar cinturón de seguridad', 240.00, 'LEVE', 20),
+(5, 'Usar celular mientras conduce', 950.00, 'GRAVE', 50);
+
+-- Registro de infracciones (conductor-vehículo-infracción)
+INSERT INTO EX1_REGISTRO_INFRACCIONES (FECHA, VEHICULO_ID, CONDUCTOR_ID, INFRACCION_ID) VALUES
+-- Infracciones básicas
+('2025-01-15', 1, 1, 3),   -- GARCIA - TOYOTA - Estacionamiento
+('2025-02-20', 2, 2, 4),   -- MARTINEZ - HYUNDAI - Cinturón
+('2025-03-10', 3, 3, 1),   -- LOPEZ - NISSAN - Velocidad
+
+-- Infracciones graves
+('2025-03-15', 4, 4, 5),   -- TORRES - KIA - Celular
+('2025-04-01', 5, 5, 2),   -- RAMIREZ - VOLKSWAGEN - Ebriedad
+
+-- Reincidencias
+('2025-04-15', 2, 1, 1),   -- GARCIA - HYUNDAI - Velocidad
+('2025-04-20', 4, 3, 2);   -- LOPEZ - KIA - Ebriedad
+
+-- Pregunta 02
+USE p3_parcial;
+DROP PROCEDURE IF EXISTS preg2_obtenerPuntosConductor
+
+DELIMITER $
+CREATE PROCEDURE preg2_obtenerPuntosConductor (
+	IN p_conductor_id INT, 
+    IN p_gravedad ENUM('LEVE', 'GRAVE', 'MUY_GRAVE'),
+    OUT p_puntos INT)
+BEGIN 
+	SET p_puntos = (
+		SELECT SUM(I.puntos)
+		FROM EX1_CONDUCTORES AS C
+		INNER JOIN EX1_REGISTRO_INFRACCIONES AS R ON R.CONDUCTOR_ID = C.CONDUCTOR_ID
+		INNER JOIN EX1_INFRACCIONES AS I ON I.INFRACCION_ID = R.INFRACCION_ID
+		WHERE C.CONDUCTOR_ID = p_conductor_id AND I.GRAVEDAD = p_gravedad
+    );
+END$
+
+-- Pregunta 03
+USE p3_parcial;
+DROP PROCEDURE IF EXISTS INSERTAR_REGISTRO_INFRACCION;
+DELIMITER $
+CREATE PROCEDURE INSERTAR_REGISTRO_INFRACCION(
+	OUT _REPORTE_ID INT,
+    IN _CONDUCTOR_ID INT,
+    IN _PATERNO VARCHAR(45),
+    IN _MATERNO VARCHAR(45),
+    IN _NOMBRES VARCHAR(45),
+    IN _VEHICULO_ID INT,
+    IN _PLACA CHAR(7),
+    IN _MARCA VARCHAR(45),
+    IN _MODELO VARCHAR(45),
+    IN _ANHO INT,
+    IN _INFRACCION_ID INT,
+    IN _DESCRIPCION VARCHAR(255),
+    IN _MONTO DECIMAL(10,3),
+    IN _GRAVEDAD VARCHAR(45)
+)
+BEGIN
+	INSERT INTO ex1_reportes_infracciones(CONDUCTOR_ID,PATERNO,MATERNO,NOMBRES,VEHICULO_ID,PLACA,MARCA,MODELO,ANHO,INFRACCION_ID,DESCRIPCION,MONTO,GRAVEDAD) VALUES(_CONDUCTOR_ID,_PATERNO,_MATERNO,_NOMBRES,_VEHICULO_ID,_PLACA,_MARCA,_MODELO,_ANHO,_INFRACCION_ID,_DESCRIPCION,_MONTO,_GRAVEDAD);
+    SET _REPORTE_ID = @@last_insert_id;
+END$
+-- Probando procedimiento almacenado para Pregunta 03
+CALL preg2_obtenerPuntosConductor(1, 'MUY_GRAVE', @puntos);
+SELECT @puntos;
