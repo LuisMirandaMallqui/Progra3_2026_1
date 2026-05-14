@@ -5,6 +5,7 @@ import pe.edu.pucp.transitsoft.modelo.Captura;
 public class EstrategiaViaRapida implements Estrategia {
     @Override
     public boolean tieneExceso(Captura captura) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // 80km CAMARA definida en el BOimpl
+        return captura.getVelocidad() > 80;
     }
 }
