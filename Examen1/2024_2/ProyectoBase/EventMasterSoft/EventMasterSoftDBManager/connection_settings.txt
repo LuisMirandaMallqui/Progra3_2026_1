@@ -1,0 +1,5 @@
+server=localhost;
+user=root;
+password=abcd1234;
+database=examen_parcial20242;
+port=3306;

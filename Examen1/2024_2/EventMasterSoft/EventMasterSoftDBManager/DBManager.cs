@@ -1,128 +1,133 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
+using System.Data;
+using System.Data.Common;
 
-namespace EventMasterSoftDBManager
+namespace SoftProgDBManager
 {
     public class DBManager
     {
-        private string archivo = "connection_settings.txt";
-        private static DBManager dbManager = new DBManager();
-        private MySqlConnection con;
+        private readonly String _connectionString;
+        private static DBManager? _instance;
+		
+        private static readonly string libreriaMySQL = "MySql.Data.MySqlClient";
+        private static readonly string libreriaMSSQL = "Microsoft.Data.SqlClient";
 
-        private DBManager()
+        private DbProviderFactory Factory => DbProviderFactories.GetFactory(_tipoMotorBD == "mysql" ? libreriaMySQL : libreriaMSSQL);
+
+        private static String? _tipoMotorBD;
+
+        private DBManager(String connectionString)
         {
-            string ruta = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, archivo);
-            string cadena = "";
-            if (File.Exists(ruta))
+            _connectionString = connectionString;
+        }
+
+        public static void Initialize(String connectionString, String tipoMotorBD)
+        {
+            if (_instance == null)
             {
-                foreach (string line in File.ReadLines(ruta))
+                _tipoMotorBD = tipoMotorBD;
+                if (tipoMotorBD.Equals("mysql"))
+                    DbProviderFactories.RegisterFactory(libreriaMySQL, MySqlClientFactory.Instance);
+                else if (tipoMotorBD.Equals("mssql"))
+                    DbProviderFactories.RegisterFactory(libreriaMSSQL, SqlClientFactory.Instance);
+                _instance = new DBManager(connectionString);
+            }
+        }
+
+        public static DBManager Instance => _instance ?? throw new Exception("DBManager no ha sido inicializado.");
+
+        public DbConnection AbrirConexion()
+        {
+            DbConnection? con = Factory.CreateConnection();
+
+            if (con == null)
+                throw new Exception("No se pudo crear la conexión.");
+
+            con.ConnectionString = _connectionString;
+            if (con.State != ConnectionState.Open)
+                con.Open();
+
+            return con;
+        }
+
+        //Métodos para llamadas a Procedimientos Almacenados
+        public DbParameter CreateParam(string nombreLogico, DbType tipo, object? valor, ParameterDirection direccion)
+        {
+            DbParameter? p = Factory.CreateParameter();
+            if (p == null)
+                throw new Exception("No se pudo crear el parámetro.");
+            p.ParameterName = nombreLogico;
+            p.DbType = tipo;
+            p.Direction = direccion;
+            p.Value = valor ?? DBNull.Value;
+            return p;
+        }
+
+        public string P(string nombreLogico)
+        {
+            return _tipoMotorBD == "mssql" ? "@" + nombreLogico : nombreLogico;
+        }
+
+        public int EjecutarProcedimiento(string nombreSP, IList<DbParameter> parametros)
+        {
+            using DbConnection con = AbrirConexion();
+            using DbCommand cmd = con.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = nombreSP;
+
+            if (parametros != null && parametros.Count > 0)
+            {
+                foreach (DbParameter p in parametros)
                 {
-                    cadena += line;
+                    p.ParameterName = P(p.ParameterName);
+                    cmd.Parameters.Add(p);
                 }
             }
-            con = new MySqlConnection(cadena);
+
+            return cmd.ExecuteNonQuery();
         }
 
-        public static DBManager Instance
+        public DbDataReader EjecutarProcedimientoLectura(string nombreSP, IList<DbParameter> parametros)
         {
-            get
+            DbConnection con = AbrirConexion();
+            DbCommand cmd = con.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = nombreSP;
+
+            if (parametros != null && parametros.Count > 0)
             {
-                return dbManager;
+                foreach (DbParameter p in parametros)
+                {
+                    p.ParameterName = P(p.ParameterName);
+                    cmd.Parameters.Add(p);
+                }
             }
+
+            return cmd.ExecuteReader(CommandBehavior.CloseConnection);
         }
 
-        public MySqlConnection Connection
+        public int EjecutarProcedimientoTransaccion(string nombreSP, IList<DbParameter> parametros, DbTransaction transaccion)
         {
-            get
+            using DbCommand cmd = transaccion.Connection!.CreateCommand();
+
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = nombreSP;
+            cmd.Transaction = transaccion;
+
+            if (parametros != null && parametros.Count > 0)
             {
-                AbrirConexion();
-                return con;
+                foreach (DbParameter p in parametros)
+                {
+                    p.ParameterName = P(p.ParameterName);
+                    cmd.Parameters.Add(p);
+                }
             }
-        }
 
-        //Método para abrir la conexión
-        public void AbrirConexion()
-        {
-            if (con.State != ConnectionState.Open)
-            {
-                con.Open();
-            }
-        }
-
-        //Método para cerrar la conexión
-        public void CerrarConexion()
-        {
-            if (con.State != ConnectionState.Closed)
-            {
-                con.Close();
-            }
-        }
-
-        //Método para ejecutar un procedimiento almacenado insert/update/delete
-        public int EjecutarProcedimiento(string nombreProcedimiento, MySqlParameter[] parameters, string nombreParametroSalida)
-        {
-            int resultado = 0;
-            try
-            {
-                AbrirConexion();
-                MySqlCommand comando = new MySqlCommand();
-                comando.Connection = con;
-                comando.CommandText = nombreProcedimiento;
-                comando.CommandType = CommandType.StoredProcedure;
-
-                // Añade los parámetros de entrada si existen
-                if (parameters != null)
-                    comando.Parameters.AddRange(parameters);
-
-                // Ejecuta el procedimiento
-                resultado = comando.ExecuteNonQuery();
-
-                // Si existe parámetro de salida, obtenemos el valor en el resultado
-                if (nombreParametroSalida != null)
-                    resultado = Convert.ToInt32(comando.Parameters[nombreParametroSalida].Value);
-            }
-            catch (MySqlException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            finally
-            {
-                CerrarConexion();
-            }
-            return resultado;
-        }
-
-        //Método para ejecutar un procedimiento almacenado select
-        public MySqlDataReader EjecutarProcedimientoLectura(string nombreProcedimiento, MySqlParameter[] parameters)
-        {
-            MySqlDataReader lector = null;
-            try
-            {
-                AbrirConexion();
-                MySqlCommand comando = new MySqlCommand();
-                comando.Connection = con;
-                comando.CommandText = nombreProcedimiento;
-                comando.CommandType = CommandType.StoredProcedure;
-
-                // Añade los parámetros de entrada si existen
-                if (parameters != null)
-                    comando.Parameters.AddRange(parameters);
-
-                lector = comando.ExecuteReader();
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return lector;
+            return cmd.ExecuteNonQuery();
         }
     }
 }

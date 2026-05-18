@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="EventMasterSoftBusiness/EventMasterSoftBusiness.csproj" />
+  <Project Path="EventMasterSoftDBManager/EventMasterSoftDBManager.csproj" />
+  <Project Path="EventMasterSoftModel/EventMasterSoftModel.csproj" />
+  <Project Path="EventMasterSoftPersistance/EventMasterSoftPersistance.csproj" />
+  <Project Path="EventMasterSoftWA/EventMasterSoftWA.csproj" />
+</Solution>
