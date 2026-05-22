@@ -16,7 +16,7 @@
 @inject TestSoftBusiness.Preguntas.BOI.IPreguntaBO PreguntaBO
 @inject TestSoftBusiness.Examenes.BOI.IExamenBO ExamenBO
 
-@* NavigationManager: servicio BUILT-IN de Blazor (no necesita registrarse en DI)
+@* NavigationManager: servicio BUILT-IN de Blazor (no necesita registrarse en la inyección de d.)
    Permite navegar entre páginas desde código C#:
    Navigation.NavigateTo("/examenes") → equivale a hacer clic en un link *@
 @inject NavigationManager Navigation
@@ -66,7 +66,7 @@
     @* =====================================================================
        CARD — FORMULARIO DE CREACION
        =====================================================================
-       Patrón Corcuera: envolver formularios dentro de cards
+       envolver formularios dentro de cards
        para darles estructura visual y sombra.
        ===================================================================== *@
     <div class="card shadow-sm">
