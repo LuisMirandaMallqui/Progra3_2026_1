@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TestSoftModel/TestSoftModel.csproj" />
+  <Project Path="TestSoftDBManager/TestSoftDBManager.csproj" />
+  <Project Path="TestSoftPersistance/TestSoftPersistance.csproj" />
+  <Project Path="TestSoftBusiness/TestSoftBusiness.csproj" />
+  <Project Path="TestSoftWA/TestSoftWA.csproj" />
+</Solution>

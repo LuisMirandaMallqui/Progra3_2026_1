@@ -1,0 +1,62 @@
+@* =====================================================================
+   NavMenu.razor — MENU DE NAVEGACION LATERAL
+   =====================================================================
+   Este componente define los links del sidebar de la aplicación.
+   Cada <NavLink> genera un link que:
+   - Se resalta automáticamente cuando estás en esa página (class "active")
+   - href="" → ruta raíz (Home)
+   - href="examenes" → página /examenes (ListarExamenes.razor)
+   - Match="NavLinkMatch.All" → solo se marca activo en ruta EXACTA
+
+   ICONOS FONT AWESOME:
+   Se usa <i class="fa-solid fa-NOMBRE"></i> dentro de cada NavLink.
+   Los íconos se cargan desde el CDN agregado en App.razor.
+   Para buscar más íconos: https://fontawesome.com/icons (solo "Free")
+   ===================================================================== *@
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">TestSoftWA</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        @* --- Home --- *@
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="fa-solid fa-house"></i> Home
+            </NavLink>
+        </div>
+
+        @* --- Alumnos --- *@
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="alumnos">
+                <i class="fa-solid fa-users"></i> Listar Alumnos
+            </NavLink>
+        </div>
+
+        @* --- Preguntas --- *@
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="preguntas">
+                <i class="fa-solid fa-circle-question"></i> Listar Preguntas
+            </NavLink>
+        </div>
+
+        @* --- Examenes --- *@
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="examenes">
+                <i class="fa-solid fa-file-lines"></i> Listar Examenes
+            </NavLink>
+        </div>
+
+        @* --- Crear Examen --- *@
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="crear-examen">
+                <i class="fa-solid fa-plus-circle"></i> Crear Examen
+            </NavLink>
+        </div>
+    </nav>
+</div>

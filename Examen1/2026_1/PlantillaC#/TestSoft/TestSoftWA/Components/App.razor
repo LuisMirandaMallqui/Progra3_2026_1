@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    @* ===============================================================
+       FONT AWESOME — Archivos LOCALES (sin internet)
+       ===============================================================
+       COMO SE INSTALO:
+         1. El profe proporcionó un ZIP con carpetas css/ y webfonts/
+         2. Se copiaron ambas carpetas dentro de wwwroot/fonts/fontawesome/
+         3. Se agrega este <link> apuntando al archivo all.min.css LOCAL
+
+       ESTRUCTURA EN EL PROYECTO:
+         wwwroot/
+           fonts/
+             fontawesome/
+               css/          ← estilos (all.min.css es el principal)
+               webfonts/     ← archivos de fuente (.woff2, .ttf)
+
+       IMPORTANTE: el CSS de Font Awesome busca los webfonts en ../webfonts/
+       Por eso css/ y webfonts/ DEBEN estar al mismo nivel dentro de fontawesome/
+
+       COMO USAR ICONOS:
+         <i class="fa-solid fa-users"></i>        → ícono sólido
+         <i class="fa-regular fa-envelope"></i>   → ícono outline
+         <i class="fa-brands fa-github"></i>      → logo de marca
+
+       PARA BUSCAR ICONOS: https://fontawesome.com/icons
+       =============================================================== *@
+    <link rel="stylesheet" href="fonts/fontawesome/css/all.min.css" />
+    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["TestSoftWA.styles.css"]" />
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <Routes @rendermode="InteractiveServer" />
+    <ReconnectModal />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>

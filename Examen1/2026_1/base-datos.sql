@@ -37,41 +37,56 @@ create table examen_pregunta (
     constraint uq_examen_orden unique (id_examen, orden)
 );
 
+-- DROPS DE TODOS LOS SPs
+drop procedure if exists insertar_alumno;
+drop procedure if exists insertar_pregunta;
+drop procedure if exists insertar_examen;
+drop procedure if exists insertar_examen_pregunta;
 drop procedure if exists buscar_alumno_por_id;
+drop procedure if exists buscar_alumno_por_codigo;
 drop procedure if exists listar_alumnos;
 drop procedure if exists listar_preguntas;
-drop procedure if exists insertar_examen;
-drop procedure if exists listar_examenes;
-drop procedure if exists insertar_examen_pregunta;
-drop procedure if exists listar_preguntas_por_examen;
 drop procedure if exists buscar_examen_por_id;
+drop procedure if exists listar_examenes;
+drop procedure if exists listar_preguntas_por_examen;
 drop procedure if exists eliminar_alumno;
 drop procedure if exists eliminar_pregunta;
 drop procedure if exists eliminar_examen;
+drop procedure if exists modificar_alumno;
+drop procedure if exists modificar_pregunta;
+drop procedure if exists modificar_examen;
 
 delimiter //
 
-create procedure buscar_alumno_por_id(in p_id int)
+-- =============================================
+-- CREAR (INSERT)
+-- =============================================
+
+-- Alumno: INSERT con OUT para devolver el id generado
+create procedure insertar_alumno(
+    in p_codigo varchar(20),
+    in p_nombre varchar(100),
+    in p_correo varchar(120),
+    out p_id int
+)
 begin
-    select id, codigo, nombre, correo
-    from alumno
-    where id = p_id;
+    insert into alumno(codigo, nombre, correo)
+    values(p_codigo, p_nombre, p_correo);
+    set p_id = last_insert_id();
 end //
 
-create procedure listar_alumnos()
+-- Pregunta: INSERT con OUT
+create procedure insertar_pregunta(
+    in p_enunciado varchar(300),
+    out p_id int
+)
 begin
-    select id, codigo, nombre, correo
-    from alumno
-    order by id;
+    insert into pregunta(enunciado)
+    values(p_enunciado);
+    set p_id = last_insert_id();
 end //
 
-create procedure listar_preguntas()
-begin
-    select id, enunciado
-    from pregunta
-    order by id;
-end //
-
+-- Examen: INSERT cabecera (se usa dentro de transaccion)
 create procedure insertar_examen(
     in p_id_alumno int,
     in p_titulo varchar(120),
@@ -80,17 +95,10 @@ create procedure insertar_examen(
 begin
     insert into examen(id_alumno, titulo)
     values(p_id_alumno, p_titulo);
-
     set p_id = last_insert_id();
 end //
 
-create procedure listar_examenes()
-begin
-    select id, id_alumno, titulo, fecha_creacion
-    from examen
-    order by id;
-end //
-
+-- ExamenPregunta: INSERT detalle (tabla puente, se usa dentro de transaccion)
 create procedure insertar_examen_pregunta(
     in p_id_examen int,
     in p_id_pregunta int,
@@ -100,10 +108,69 @@ create procedure insertar_examen_pregunta(
 begin
     insert into examen_pregunta(id_examen, id_pregunta, orden)
     values(p_id_examen, p_id_pregunta, p_orden);
-
     set p_id = last_insert_id();
 end //
 
+-- =============================================
+-- LEER (SELECT)
+-- =============================================
+
+-- Alumno: buscar por id (retorna ResultSet)
+create procedure buscar_alumno_por_id(in p_id int)
+begin
+    select id, codigo, nombre, correo
+    from alumno
+    where id = p_id;
+end //
+
+-- *** PATRON SELECT INTO ***
+-- Alumno: buscar por codigo con SELECT INTO (retorna id via OUT, NO ResultSet)
+-- Igual al buscar_tipo_pokemon_por_nombre del Lab7
+-- Uso: verificar si un alumno ya existe antes de insertar (evitar duplicados)
+create procedure buscar_alumno_por_codigo(
+    in p_codigo varchar(20),
+    out p_id int
+)
+begin
+    set p_id = null;
+    select id into p_id
+    from alumno
+    where codigo = p_codigo;
+end //
+
+-- Alumno: listar todos
+create procedure listar_alumnos()
+begin
+    select id, codigo, nombre, correo
+    from alumno
+    order by id;
+end //
+
+-- Pregunta: listar todas
+create procedure listar_preguntas()
+begin
+    select id, enunciado
+    from pregunta
+    order by id;
+end //
+
+-- Examen: buscar por id
+create procedure buscar_examen_por_id(in p_id int)
+begin
+    select id, id_alumno, titulo, fecha_creacion
+    from examen
+    where id = p_id;
+end //
+
+-- Examen: listar todos
+create procedure listar_examenes()
+begin
+    select id, id_alumno, titulo, fecha_creacion
+    from examen
+    order by id;
+end //
+
+-- ExamenPregunta: listar preguntas de un examen (JOIN)
 create procedure listar_preguntas_por_examen(in p_id_examen int)
 begin
     select p.id, p.enunciado
@@ -113,12 +180,45 @@ begin
     order by ep.orden;
 end //
 
-create procedure buscar_examen_por_id(in p_id int)
+-- =============================================
+-- MODIFICAR (UPDATE)
+-- =============================================
+
+create procedure modificar_alumno(
+    in p_id int,
+    in p_codigo varchar(20),
+    in p_nombre varchar(100),
+    in p_correo varchar(120)
+)
 begin
-    select id, id_alumno, titulo, fecha_creacion
-    from examen
+    update alumno
+    set codigo = p_codigo, nombre = p_nombre, correo = p_correo
     where id = p_id;
 end //
+
+create procedure modificar_pregunta(
+    in p_id int,
+    in p_enunciado varchar(300)
+)
+begin
+    update pregunta
+    set enunciado = p_enunciado
+    where id = p_id;
+end //
+
+create procedure modificar_examen(
+    in p_id int,
+    in p_titulo varchar(120)
+)
+begin
+    update examen
+    set titulo = p_titulo
+    where id = p_id;
+end //
+
+-- =============================================
+-- ELIMINAR (DELETE)
+-- =============================================
 
 create procedure eliminar_alumno(in p_id int)
 begin
@@ -130,6 +230,7 @@ begin
     delete from pregunta where id = p_id;
 end //
 
+-- Examen: elimina primero los detalles (tabla puente) y luego la cabecera
 create procedure eliminar_examen(in p_id int)
 begin
     delete from examen_pregunta where id_examen = p_id;
@@ -137,6 +238,10 @@ begin
 end //
 
 delimiter ;
+
+-- =============================================
+-- DATOS DE PRUEBA
+-- =============================================
 
 insert into alumno(codigo, nombre, correo) values
 ('2026001', 'Alumno 1', 'alumno1@testsoft.edu.pe'),

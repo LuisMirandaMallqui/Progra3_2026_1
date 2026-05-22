@@ -1,0 +1,103 @@
+@* ===================================================================
+   RUTA CON PARAMETRO
+   ===================================================================
+   /examen/{Id:int} → el {Id:int} captura un número de la URL.
+   Ejemplo: /examen/5 → Id = 5
+   El ":int" es una restricción de tipo (solo acepta enteros).
+   Blazor asigna automáticamente el valor al parámetro [Parameter] Id.
+   =================================================================== *@
+@page "/examen/{Id:int}"
+
+@inject TestSoftBusiness.Examenes.BOI.IExamenBO ExamenBO
+@rendermode InteractiveServer
+
+<PageTitle>Detalle Examen</PageTitle>
+
+@if (examen == null)
+{
+    <p><em>Cargando examen...</em></p>
+}
+else
+{
+    <h3><i class="fa-solid fa-file-lines"></i> Examen #@examen.Id</h3>
+
+    @* --- Datos del examen --- *@
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">@examen.Titulo</h5>
+            <p class="card-text">
+                <strong>Fecha:</strong> @examen.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+            </p>
+            @if (examen.Alumno != null)
+            {
+                <p class="card-text">
+                    <strong>Alumno:</strong> @examen.Alumno.Codigo - @examen.Alumno.Nombre
+                    <br />
+                    <strong>Correo:</strong> @examen.Alumno.Correo
+                </p>
+            }
+        </div>
+    </div>
+
+    @* --- Preguntas asignadas --- *@
+    <h5><i class="fa-solid fa-list-ol"></i> Preguntas asignadas (@examen.Preguntas.Count)</h5>
+
+    @if (examen.Preguntas.Count == 0)
+    {
+        <p>Este examen no tiene preguntas asignadas.</p>
+    }
+    else
+    {
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 60px;">#</th>
+                    <th>Enunciado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < examen.Preguntas.Count; i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@examen.Preguntas[i].Enunciado</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @* Botón para volver a la lista *@
+    <a href="/examenes" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Volver a la lista
+    </a>
+}
+
+@code {
+    // ===================================================================
+    // [Parameter]: PARAMETRO DE RUTA
+    // ===================================================================
+    // Blazor mapea automáticamente el {Id} de la URL a esta propiedad.
+    // Debe ser público y tener [Parameter].
+    // Si la URL es /examen/5, entonces Id = 5.
+    [Parameter]
+    public int Id { get; set; }
+
+    private TestSoftModel.Examen.Examen? examen;
+
+    // ===================================================================
+    // OnInitializedAsync: carga el examen por ID
+    // ===================================================================
+    // Internamente: ExamenBOImpl → ExamenImpl.BuscarPorId(id)
+    // El DAO usa PATRON 2 FASES:
+    //   Fase 1: lee id, titulo, fecha_creacion, id_alumno del DataReader
+    //   Fase 2: cierra el DataReader, luego carga:
+    //     - Alumno via AlumnoImpl.BuscarPorId(idAlumno) → nueva conexión
+    //     - Preguntas via ListarPreguntasPorExamen(idExamen) → nueva conexión
+    // Si NO se hiciera en 2 fases, al intentar abrir una segunda conexión
+    // mientras la primera sigue abierta se produce un error de conexión.
+    protected override async Task OnInitializedAsync()
+    {
+        examen = ExamenBO.BuscarPorId(Id);
+    }
+}

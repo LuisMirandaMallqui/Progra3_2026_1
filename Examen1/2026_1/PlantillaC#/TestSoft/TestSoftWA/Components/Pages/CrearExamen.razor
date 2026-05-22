@@ -1,0 +1,135 @@
+@page "/crear-examen"
+
+@* ===================================================================
+   MULTIPLE INYECCION DE DEPENDENCIAS
+   ===================================================================
+   Se pueden inyectar tantos servicios como se necesiten.
+   Cada @inject crea una variable que apunta a la implementación
+   registrada en Program.cs via AddScoped.
+   =================================================================== *@
+@inject TestSoftBusiness.Alumnos.BOI.IAlumnoBO AlumnoBO
+@inject TestSoftBusiness.Preguntas.BOI.IPreguntaBO PreguntaBO
+@inject TestSoftBusiness.Examenes.BOI.IExamenBO ExamenBO
+
+@* NavigationManager: servicio built-in de Blazor para navegar entre páginas *@
+@inject NavigationManager Navigation
+
+@rendermode InteractiveServer
+
+<PageTitle>Crear Examen</PageTitle>
+
+<h3><i class="fa-solid fa-plus-circle"></i> Crear Examen</h3>
+
+@* --- Mensaje de éxito --- *@
+@if (mensaje != null)
+{
+    <div class="alert alert-success alert-dismissible">
+        <i class="fa-solid fa-check-circle"></i> @mensaje
+        <a href="/examenes" class="btn btn-sm btn-outline-success ms-3">Ver examenes</a>
+    </div>
+}
+
+@if (alumnos == null)
+{
+    <p><em>Cargando alumnos...</em></p>
+}
+else
+{
+    @* ===================================================================
+       DATA BINDING con @bind
+       ===================================================================
+       @bind="idAlumnoSeleccionado" crea un TWO-WAY BINDING:
+       - Cuando el usuario selecciona una opción, la variable se actualiza
+       - Si la variable cambia desde el código, el <select> se actualiza
+       Es el equivalente a [(ngModel)] en Angular o v-model en Vue.
+       =================================================================== *@
+    <div class="mb-3">
+        <label class="form-label"><strong>Seleccionar Alumno:</strong></label>
+        <select class="form-select" @bind="idAlumnoSeleccionado">
+            <option value="0">-- Seleccione un alumno --</option>
+            @foreach (var alumno in alumnos)
+            {
+                <option value="@alumno.Id">@alumno.Codigo - @alumno.Nombre</option>
+            }
+        </select>
+    </div>
+
+    @* ===================================================================
+       EVENTO @onclick
+       ===================================================================
+       @onclick="GenerarExamen" llama al método C# GenerarExamen()
+       cuando el usuario hace clic en el botón.
+       disabled="@(expresion)" desactiva el botón condicionalmente.
+       Requiere @rendermode InteractiveServer para funcionar.
+       =================================================================== *@
+    <button class="btn btn-primary" @onclick="GenerarExamen"
+            disabled="@(idAlumnoSeleccionado == 0 || procesando)">
+        @if (procesando)
+        {
+            <span class="spinner-border spinner-border-sm"></span>
+            <span> Creando...</span>
+        }
+        else
+        {
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span> Generar Examen (10 preguntas aleatorias)</span>
+        }
+    </button>
+}
+
+@code {
+    // ===================================================================
+    // VARIABLES DE ESTADO DEL COMPONENTE
+    // ===================================================================
+    // Blazor re-renderiza la página automáticamente cuando estas cambian
+    private List<TestSoftModel.Alumno.Alumno>? alumnos;
+    private int idAlumnoSeleccionado = 0;
+    private string? mensaje;
+    private bool procesando = false;
+
+    // ===================================================================
+    // CICLO DE VIDA: OnInitializedAsync
+    // ===================================================================
+    // Se ejecuta UNA VEZ cuando la página carga.
+    // Carga la lista de alumnos para el <select>.
+    protected override async Task OnInitializedAsync()
+    {
+        alumnos = AlumnoBO.ListarTodos();
+    }
+
+    // ===================================================================
+    // METODO DEL EVENTO @onclick
+    // ===================================================================
+    private void GenerarExamen()
+    {
+        procesando = true;
+        mensaje = null;
+
+        // 1. Buscar el alumno seleccionado por su ID
+        //    Flujo: AlumnoBO.BuscarPorId → AlumnoBOImpl → AlumnoImpl
+        //    → DBManager.EjecutarProcLectura("buscar_alumno_por_id")
+        var alumno = AlumnoBO.BuscarPorId(idAlumnoSeleccionado);
+        if (alumno == null)
+        {
+            mensaje = "Alumno no encontrado.";
+            procesando = false;
+            return;
+        }
+
+        // 2. Seleccionar 10 preguntas aleatorias
+        //    Flujo: PreguntaBO.SeleccionarPreguntasAleatorias()
+        //    → PreguntaBOImpl: lista todas, mezcla con Random, toma 10
+        var preguntas = PreguntaBO.SeleccionarPreguntasAleatorias();
+
+        // 3. Crear el examen CON TRANSACCION
+        //    Flujo: ExamenBO.CrearExamenConPreguntas()
+        //    → ExamenBOImpl → ExamenImpl.Insertar()
+        //    → DBManager: BeginTransaction → insertar_examen (cabecera)
+        //    → loop insertar_examen_pregunta (cada detalle)
+        //    → Commit (o Rollback si falla alguno)
+        ExamenBO.CrearExamenConPreguntas(alumno, $"Examen para {alumno.Codigo}", preguntas);
+
+        mensaje = $"Examen creado exitosamente para {alumno.Codigo} con {preguntas.Count} preguntas.";
+        procesando = false;
+    }
+}

@@ -1,0 +1,91 @@
+@page "/alumnos"
+
+@* ===================================================================
+   INYECCION DE DEPENDENCIA (@inject)
+   ===================================================================
+   - @inject le dice a Blazor: "dame una instancia de IAlumnoBO"
+   - Blazor busca en Program.cs qué implementación se registró:
+       builder.Services.AddScoped<IAlumnoBO, AlumnoBOImpl>();
+   - Entonces crea un AlumnoBOImpl y lo asigna a la variable "AlumnoBO"
+   - SIEMPRE se inyecta la INTERFAZ (IAlumnoBO), nunca la clase concreta
+   =================================================================== *@
+@inject TestSoftBusiness.Alumnos.BOI.IAlumnoBO AlumnoBO
+
+@* rendermode InteractiveServer = el componente se ejecuta en el servidor
+   y se comunica con el browser via SignalR (websocket).
+   Sin esto, el @onclick y los eventos NO funcionan. *@
+@rendermode InteractiveServer
+
+<PageTitle>Alumnos</PageTitle>
+
+<h3><i class="fa-solid fa-users"></i> Lista de Alumnos</h3>
+
+@* ===================================================================
+   RENDERIZADO CONDICIONAL
+   ===================================================================
+   Blazor re-renderiza automáticamente cuando cambian las variables.
+   - alumnos == null → aún no se cargaron (OnInitializedAsync no terminó)
+   - alumnos.Count == 0 → se cargaron pero no hay datos
+   - else → mostrar la tabla
+   =================================================================== *@
+@if (alumnos == null)
+{
+    <p><em>Cargando alumnos...</em></p>
+}
+else if (alumnos.Count == 0)
+{
+    <p>No hay alumnos registrados.</p>
+}
+else
+{
+    <p>Total: @alumnos.Count alumnos</p>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @* ===================================================================
+               @foreach en Razor
+               ===================================================================
+               Itera sobre la lista y genera una fila <tr> por cada alumno.
+               @alumno.Propiedad se reemplaza por el valor real en el HTML.
+               =================================================================== *@
+            @foreach (var alumno in alumnos)
+            {
+                <tr>
+                    <td>@alumno.Id</td>
+                    <td>@alumno.Codigo</td>
+                    <td>@alumno.Nombre</td>
+                    <td>@alumno.Correo</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    // ===================================================================
+    // BLOQUE @code: aquí va la lógica C# del componente
+    // ===================================================================
+
+    // Variable que almacena la lista de alumnos (null = aún no cargada)
+    private List<TestSoftModel.Alumno.Alumno>? alumnos;
+
+    // ===================================================================
+    // OnInitializedAsync(): CICLO DE VIDA del componente
+    // ===================================================================
+    // Se ejecuta automáticamente cuando la página se carga por primera vez.
+    // Es el equivalente a Page_Load en WebForms o ngOnInit en Angular.
+    // Aquí llamamos al BO inyectado para traer los datos de la BD.
+    protected override async Task OnInitializedAsync()
+    {
+        // AlumnoBO fue inyectado por @inject arriba
+        // Internamente: AlumnoBOImpl → AlumnoImpl → DBManager → SP listar_alumnos()
+        alumnos = AlumnoBO.ListarTodos();
+    }
+}

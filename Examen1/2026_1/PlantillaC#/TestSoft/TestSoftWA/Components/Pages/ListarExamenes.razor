@@ -1,0 +1,83 @@
+@page "/examenes"
+
+@* ===================================================================
+   INYECCION DE DEPENDENCIA
+   ===================================================================
+   @inject <Interfaz> <NombreVariable>
+   Blazor busca en Program.cs qué clase se registró para esa interfaz:
+       builder.Services.AddScoped<IExamenBO, ExamenBOImpl>();
+   Y crea una instancia de ExamenBOImpl por cada solicitud (Scoped).
+
+   Ciclo completo: Página → @inject IExamenBO → ExamenBOImpl → ExamenImpl → DBManager → MySQL
+   =================================================================== *@
+@inject TestSoftBusiness.Examenes.BOI.IExamenBO ExamenBO
+@rendermode InteractiveServer
+
+<PageTitle>Examenes</PageTitle>
+
+<h3><i class="fa-solid fa-file-lines"></i> Lista de Examenes</h3>
+
+@if (examenes == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (examenes.Count == 0)
+{
+    <p>No hay examenes registrados. <a href="/crear-examen">Crear uno</a></p>
+}
+else
+{
+    <p>Total: @examenes.Count examenes</p>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Alumno</th>
+                <th>Titulo</th>
+                <th>Fecha</th>
+                <th>Preguntas</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var examen in examenes)
+            {
+                <tr>
+                    <td>@examen.Id</td>
+                    <td>@(examen.Alumno != null ? $"{examen.Alumno.Codigo} - {examen.Alumno.Nombre}" : "N/A")</td>
+                    <td>@examen.Titulo</td>
+                    <td>@examen.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@examen.Preguntas.Count</td>
+                    <td>
+                        @* ===================================================================
+                           NAVEGACION CON PARAMETRO
+                           ===================================================================
+                           href="/examen/@examen.Id" → Blazor navega a la página
+                           DetalleExamen.razor que tiene @page "/examen/{Id:int}"
+                           El Id del examen se pasa por la URL.
+                           =================================================================== *@
+                        <a href="/examen/@examen.Id" class="btn btn-sm btn-info">
+                            <i class="fa-solid fa-eye"></i> Ver detalle
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<TestSoftModel.Examen.Examen>? examenes;
+
+    // OnInitializedAsync: ciclo de vida, se ejecuta al cargar la página
+    // El flujo completo:
+    //   ExamenBO.ListarTodos()           → interfaz inyectada
+    //   → ExamenBOImpl.ListarTodos()     → implementación registrada en DI
+    //   → ExamenImpl.ListarTodos()       → capa persistencia (DAO)
+    //   → DBManager.EjecutarProcLectura  → SP listar_examenes()
+    //   → Fase 2: carga Alumno + Preguntas por cada examen (conexiones separadas)
+    protected override async Task OnInitializedAsync()
+    {
+        examenes = ExamenBO.ListarTodos();
+    }
+}

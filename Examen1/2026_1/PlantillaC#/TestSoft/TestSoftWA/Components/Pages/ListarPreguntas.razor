@@ -1,0 +1,48 @@
+@page "/preguntas"
+
+@inject TestSoftBusiness.Preguntas.BOI.IPreguntaBO PreguntaBO
+@rendermode InteractiveServer
+
+<PageTitle>Preguntas</PageTitle>
+
+<h3><i class="fa-solid fa-clipboard-question"></i> Banco de Preguntas</h3>
+
+@if (preguntas == null)
+{
+    <p><em>Cargando preguntas...</em></p>
+}
+else if (preguntas.Count == 0)
+{
+    <p>No hay preguntas registradas.</p>
+}
+else
+{
+    <p>Total: @preguntas.Count preguntas en el banco</p>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th style="width: 60px;">ID</th>
+                <th>Enunciado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pregunta in preguntas)
+            {
+                <tr>
+                    <td>@pregunta.Id</td>
+                    <td>@pregunta.Enunciado</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<TestSoftModel.Pregunta.Pregunta>? preguntas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // PreguntaBO inyectado → PreguntaBOImpl → PreguntaImpl → SP listar_preguntas()
+        preguntas = PreguntaBO.ListarTodos();
+    }
+}
