@@ -1,85 +1,201 @@
-@* ===================================================================
+@* =====================================================================
    RUTA CON PARAMETRO
-   ===================================================================
-   /examen/{Id:int} → el {Id:int} captura un número de la URL.
-   Ejemplo: /examen/5 → Id = 5
-   El ":int" es una restricción de tipo (solo acepta enteros).
-   Blazor asigna automáticamente el valor al parámetro [Parameter] Id.
-   =================================================================== *@
+   =====================================================================
+   /examen/{Id:int} → el {Id:int} captura un número entero de la URL.
+
+   EJEMPLO:
+     URL: /examen/5 → Id = 5
+     URL: /examen/42 → Id = 42
+     URL: /examen/abc → NO COINCIDE (":int" exige número)
+
+   ¿COMO FUNCIONA?
+     1. El usuario hace clic en <a href="/examen/5"> (en ListarExamenes)
+     2. Blazor detecta que la URL coincide con este @page
+     3. Asigna automáticamente el valor 5 a la propiedad [Parameter] Id
+     4. Ejecuta OnInitializedAsync con Id = 5
+
+   OTROS TIPOS DE RESTRICCION:
+     {Id:int}    → solo enteros
+     {Nombre}    → cualquier string (sin restricción)
+     {Id:guid}   → solo GUIDs
+   ===================================================================== *@
 @page "/examen/{Id:int}"
 
+@* Inyección del servicio de Examen *@
 @inject TestSoftBusiness.Examenes.BOI.IExamenBO ExamenBO
+
 @rendermode InteractiveServer
 
 <PageTitle>Detalle Examen</PageTitle>
 
-@if (examen == null)
-{
-    <p><em>Cargando examen...</em></p>
-}
-else
-{
-    <h3><i class="fa-solid fa-file-lines"></i> Examen #@examen.Id</h3>
+<div class="container mt-4">
 
-    @* --- Datos del examen --- *@
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">@examen.Titulo</h5>
-            <p class="card-text">
-                <strong>Fecha:</strong> @examen.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
-            </p>
-            @if (examen.Alumno != null)
-            {
-                <p class="card-text">
-                    <strong>Alumno:</strong> @examen.Alumno.Codigo - @examen.Alumno.Nombre
-                    <br />
-                    <strong>Correo:</strong> @examen.Alumno.Correo
-                </p>
-            }
-        </div>
-    </div>
-
-    @* --- Preguntas asignadas --- *@
-    <h5><i class="fa-solid fa-list-ol"></i> Preguntas asignadas (@examen.Preguntas.Count)</h5>
-
-    @if (examen.Preguntas.Count == 0)
+    @if (examen == null)
     {
-        <p>Este examen no tiene preguntas asignadas.</p>
+        @* --- ESTADO: CARGANDO ---
+           d-flex justify-content-center: centra horizontalmente con flexbox
+           flex-column: los hijos se apilan verticalmente
+           align-items-center: centra horizontalmente los hijos *@
+        <div class="d-flex justify-content-center align-items-center flex-column p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="text-muted mt-3">Cargando examen...</p>
+        </div>
     }
     else
     {
-        <table class="table table-bordered">
-            <thead class="table-dark">
-                <tr>
-                    <th style="width: 60px;">#</th>
-                    <th>Enunciado</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < examen.Preguntas.Count; i++)
-                {
-                    <tr>
-                        <td>@(i + 1)</td>
-                        <td>@examen.Preguntas[i].Enunciado</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+        @* --- ENCABEZADO --- *@
+        <div class="row mb-3 align-items-center">
+            <div class="col">
+                <h2 class="mb-0">
+                    <i class="fa-solid fa-file-lines"></i> Examen #@examen.Id
+                </h2>
+            </div>
+            <div class="col-auto">
+                @* btn-outline-secondary: botón con borde gris sin relleno
+                   Los "outline" son más sutiles que los botones sólidos.
+                   Variantes: btn-outline-primary, btn-outline-danger, etc. *@
+                <a href="/examenes" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Volver a la lista
+                </a>
+            </div>
+        </div>
 
-    @* Botón para volver a la lista *@
-    <a href="/examenes" class="btn btn-secondary">
-        <i class="fa-solid fa-arrow-left"></i> Volver a la lista
-    </a>
-}
+        @* =====================================================================
+           CARD — INFORMACION DEL EXAMEN
+           =====================================================================
+           ESTRUCTURA DE CARD:
+             card → contenedor
+               card-body → contenido principal
+                 card-title → título dentro de la card (h5)
+                 card-text → párrafo dentro de la card
+
+           CLASES EXTRAS:
+             · shadow-sm: sombra suave
+             · mb-4: margin-bottom 1.5rem (separa de la tabla de abajo)
+             · border-start border-primary border-4:
+               Agrega una línea vertical azul gruesa en el borde izquierdo.
+               Es un estilo decorativo que destaca visualmente la card.
+               · border-start: borde solo en el lado izquierdo
+               · border-primary: color azul (primary de Bootstrap)
+               · border-4: grosor 4 (más grueso que el default)
+           ===================================================================== *@
+        <div class="card shadow-sm mb-4 border-start border-primary border-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fa-solid fa-bookmark text-primary"></i> @examen.Titulo
+                </h5>
+
+                @* =====================================================================
+                   GRID DENTRO DE LA CARD — 2 columnas de información
+                   =====================================================================
+                   row > col-md-6: divide el contenido en 2 columnas iguales
+                   (en pantallas medianas+ cada una ocupa 50%, en móviles 100%)
+                   ===================================================================== *@
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <p class="card-text mb-2">
+                            <i class="fa-solid fa-calendar text-muted"></i>
+                            <strong> Fecha:</strong>
+                            @examen.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        @if (examen.Alumno != null)
+                        {
+                            <p class="card-text mb-2">
+                                <i class="fa-solid fa-user text-muted"></i>
+                                <strong> Alumno:</strong>
+                                <span class="badge bg-primary">@examen.Alumno.Codigo</span>
+                                @examen.Alumno.Nombre
+                            </p>
+                            <p class="card-text mb-2">
+                                <i class="fa-solid fa-envelope text-muted"></i>
+                                <strong> Correo:</strong>
+                                <span class="text-muted">@examen.Alumno.Correo</span>
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* =====================================================================
+           CARD — TABLA DE PREGUNTAS ASIGNADAS
+           ===================================================================== *@
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">
+                    <i class="fa-solid fa-list-ol"></i>
+                    Preguntas asignadas
+                    @* BADGE inline con el título *@
+                    <span class="badge bg-info text-dark ms-2">@examen.Preguntas.Count</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                @if (examen.Preguntas.Count == 0)
+                {
+                    <div class="text-center text-muted p-4">
+                        <i class="fa-solid fa-inbox"></i> Este examen no tiene preguntas asignadas.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3" style="width: 80px;">#</th>
+                                    <th scope="col" class="px-4 py-3">Enunciado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* =====================================================================
+                                   @for vs @foreach
+                                   =====================================================================
+                                   Aquí usamos @for en vez de @foreach porque necesitamos
+                                   el INDICE (i) para mostrar el número de pregunta (i + 1).
+
+                                   Con @foreach no tienes acceso directo al índice.
+                                   Alternativa: @foreach con un contador manual, pero @for es más limpio.
+                                   ===================================================================== *@
+                                @for (int i = 0; i < examen.Preguntas.Count; i++)
+                                {
+                                    <tr>
+                                        @* BADGE CIRCULAR para el número de pregunta
+                                           bg-secondary: fondo gris
+                                           rounded-pill: bordes completamente redondeados (pastilla) *@
+                                        <td class="align-middle px-4">
+                                            <span class="badge bg-secondary rounded-pill">@(i + 1)</span>
+                                        </td>
+                                        <td class="align-middle px-4">
+                                            <i class="fa-solid fa-circle-question text-info"></i>
+                                            @examen.Preguntas[i].Enunciado
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     // ===================================================================
     // [Parameter]: PARAMETRO DE RUTA
     // ===================================================================
     // Blazor mapea automáticamente el {Id} de la URL a esta propiedad.
-    // Debe ser público y tener [Parameter].
-    // Si la URL es /examen/5, entonces Id = 5.
+    //
+    // REQUISITOS:
+    //   · Debe ser public (Blazor necesita acceso)
+    //   · Debe tener [Parameter] (atributo que lo marca como parámetro)
+    //   · El nombre DEBE coincidir con el de la ruta: {Id} → public int Id
+    //
+    // EJEMPLO: URL /examen/5 → Id = 5
     [Parameter]
     public int Id { get; set; }
 
@@ -88,14 +204,11 @@ else
     // ===================================================================
     // OnInitializedAsync: carga el examen por ID
     // ===================================================================
-    // Internamente: ExamenBOImpl → ExamenImpl.BuscarPorId(id)
-    // El DAO usa PATRON 2 FASES:
+    // Internamente usa PATRON 2 FASES en ExamenImpl.BuscarPorId(id):
     //   Fase 1: lee id, titulo, fecha_creacion, id_alumno del DataReader
     //   Fase 2: cierra el DataReader, luego carga:
     //     - Alumno via AlumnoImpl.BuscarPorId(idAlumno) → nueva conexión
     //     - Preguntas via ListarPreguntasPorExamen(idExamen) → nueva conexión
-    // Si NO se hiciera en 2 fases, al intentar abrir una segunda conexión
-    // mientras la primera sigue abierta se produce un error de conexión.
     protected override async Task OnInitializedAsync()
     {
         examen = ExamenBO.BuscarPorId(Id);

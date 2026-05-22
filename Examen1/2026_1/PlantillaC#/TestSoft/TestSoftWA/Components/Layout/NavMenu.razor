@@ -1,5 +1,5 @@
 @* =====================================================================
-   NavMenu.razor — MENU DE NAVEGACION LATERAL
+   NavMenu.razor — MENU DE NAVEGACION LATERAL (Sidebar)
    =====================================================================
    Este componente define los links del sidebar de la aplicación.
    Cada <NavLink> genera un link que:
@@ -10,52 +10,150 @@
 
    ICONOS FONT AWESOME:
    Se usa <i class="fa-solid fa-NOMBRE"></i> dentro de cada NavLink.
-   Los íconos se cargan desde el CDN agregado en App.razor.
+   Los íconos se cargan desde el archivo LOCAL en App.razor (wwwroot/fonts/fontawesome/).
    Para buscar más íconos: https://fontawesome.com/icons (solo "Free")
+
+   =====================================================================
+   GUIA RAPIDA DE METRICAS BOOTSTRAP (Spacing Utilities)
+   =====================================================================
+   Bootstrap usa un sistema de clases para manejar márgenes y paddings
+   sin tener que escribir CSS a mano. La fórmula es:
+
+       {propiedad}{lado}-{tamaño}
+
+   PROPIEDAD:
+     m = margin (espacio FUERA del elemento)
+     p = padding (espacio DENTRO del elemento)
+
+   LADO:
+     t = top (arriba)           b = bottom (abajo)
+     s = start (izquierda)      e = end (derecha)
+     x = horizontal (izq + der) y = vertical (arriba + abajo)
+     (nada) = los 4 lados
+
+   TAMAÑO (escala de 0 a 5):
+     0 = 0rem    (0px)
+     1 = 0.25rem (4px)
+     2 = 0.5rem  (8px)
+     3 = 1rem    (16px)
+     4 = 1.5rem  (24px)
+     5 = 3rem    (48px)
+     auto = automático (solo para margin)
+
+   EJEMPLOS:
+     mt-3  → margin-top: 1rem      (16px arriba)
+     px-4  → padding-left + padding-right: 1.5rem (24px a cada lado)
+     mb-0  → margin-bottom: 0      (sin margen abajo)
+     ms-2  → margin-start: 0.5rem  (8px a la izquierda)
+     me-2  → margin-end: 0.5rem    (8px a la derecha)
+     py-3  → padding-top + padding-bottom: 1rem (16px arriba y abajo)
+     p-4   → padding en los 4 lados: 1.5rem (24px)
+
+   APLICADO A ESTE NavMenu:
+     px-3 en nav-item → padding horizontal de 1rem (16px) a cada lado del link
+     ps-3 en top-row  → padding-start (izquierda) de 1rem en el encabezado
+     me-2 en <i>      → margin-end de 0.5rem (8px) entre ícono y texto
+
+   =====================================================================
+   OTRAS CLASES UTILES DE BOOTSTRAP PARA TEXTOS Y COLORES
+   =====================================================================
+   TEXTO:
+     fw-bold      → font-weight: bold (negrita)
+     fw-normal    → font-weight: normal
+     text-muted   → color gris suave
+     text-center  → centrar texto
+     text-end     → alinear a la derecha
+     small        → texto más pequeño (85% del tamaño base)
+
+   COLORES DE FONDO (bg-):
+     bg-primary   → azul      bg-success   → verde
+     bg-danger    → rojo      bg-warning   → amarillo
+     bg-info      → celeste   bg-secondary → gris
+     bg-dark      → negro     bg-white     → blanco
+     bg-light     → gris claro
+
+   COLORES DE TEXTO (text-):
+     text-primary, text-success, text-danger, text-warning,
+     text-info, text-secondary, text-dark, text-white, text-muted
+
+   DISPLAY (visibilidad y layout):
+     d-none       → oculto
+     d-block      → bloque (ocupa todo el ancho)
+     d-flex       → activa flexbox
+     d-inline     → en línea
    ===================================================================== *@
 
+@* =====================================================================
+   ENCABEZADO DEL SIDEBAR
+   =====================================================================
+   top-row: clase del template Blazor para la fila superior del sidebar
+   ps-3: padding-start (izquierda) de 1rem → separa el logo del borde
+   navbar navbar-dark: estilo de Bootstrap para barra de navegación oscura
+   container-fluid: el contenido ocupa el 100% del ancho disponible
+   navbar-brand: estilo para el nombre/logo de la app (texto grande y blanco)
+   ===================================================================== *@
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">TestSoftWA</a>
     </div>
 </div>
 
+@* Checkbox oculto que controla el menú hamburguesa en móviles *@
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
+@* =====================================================================
+   LISTA DE LINKS DE NAVEGACION
+   =====================================================================
+   nav-scrollable: permite scroll si hay muchos links
+   nav flex-column: los links se apilan verticalmente (columna)
+   nav-item: cada elemento del menú
+   px-3: padding horizontal de 1rem (16px) → separa el link de los bordes
+
+   NavLink: componente de Blazor que genera un <a> con la clase "active"
+   automáticamente cuando la URL actual coincide con el href.
+   ===================================================================== *@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        @* --- Home --- *@
+
+        @* --- Home ---
+           Match="NavLinkMatch.All" → solo se marca "active" si la URL es
+           EXACTAMENTE "/" (no si es /alumnos, /examenes, etc.)
+           Sin este Match, Home siempre estaría activo porque "/" es prefijo de todo. *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <i class="fa-solid fa-house"></i> Home
+                @* me-2: margin-end de 0.5rem (8px) entre el ícono y el texto
+                   Esto crea el espacio visual entre  y "Home"
+                   Sin me-2 el ícono queda pegado al texto y se ve feo.
+                   Puedes cambiar a me-1 (4px) o me-3 (16px) según gustes. *@
+                <i class="fa-solid fa-house me-2"></i> Home
             </NavLink>
         </div>
 
         @* --- Alumnos --- *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="alumnos">
-                <i class="fa-solid fa-users"></i> Listar Alumnos
+                <i class="fa-solid fa-users me-2"></i> Listar Alumnos
             </NavLink>
         </div>
 
         @* --- Preguntas --- *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="preguntas">
-                <i class="fa-solid fa-circle-question"></i> Listar Preguntas
+                <i class="fa-solid fa-circle-question me-2"></i> Listar Preguntas
             </NavLink>
         </div>
 
         @* --- Examenes --- *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="examenes">
-                <i class="fa-solid fa-file-lines"></i> Listar Examenes
+                <i class="fa-solid fa-file-lines me-2"></i> Listar Examenes
             </NavLink>
         </div>
 
         @* --- Crear Examen --- *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="crear-examen">
-                <i class="fa-solid fa-plus-circle"></i> Crear Examen
+                <i class="fa-solid fa-plus-circle me-2"></i> Crear Examen
             </NavLink>
         </div>
     </nav>

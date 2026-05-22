@@ -1,81 +1,139 @@
 @page "/examenes"
 
-@* ===================================================================
-   INYECCION DE DEPENDENCIA
-   ===================================================================
-   @inject <Interfaz> <NombreVariable>
-   Blazor busca en Program.cs qué clase se registró para esa interfaz:
-       builder.Services.AddScoped<IExamenBO, ExamenBOImpl>();
-   Y crea una instancia de ExamenBOImpl por cada solicitud (Scoped).
-
-   Ciclo completo: Página → @inject IExamenBO → ExamenBOImpl → ExamenImpl → DBManager → MySQL
-   =================================================================== *@
+@* --- INYECCION: IExamenBO → ExamenBOImpl (Program.cs) --- *@
 @inject TestSoftBusiness.Examenes.BOI.IExamenBO ExamenBO
+
+@* Sin esto @onclick y @bind no funcionan *@
 @rendermode InteractiveServer
 
 <PageTitle>Examenes</PageTitle>
 
-<h3><i class="fa-solid fa-file-lines"></i> Lista de Examenes</h3>
+<div class="container mt-4">
 
-@if (examenes == null)
-{
-    <p><em>Cargando...</em></p>
-}
-else if (examenes.Count == 0)
-{
-    <p>No hay examenes registrados. <a href="/crear-examen">Crear uno</a></p>
-}
-else
-{
-    <p>Total: @examenes.Count examenes</p>
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Alumno</th>
-                <th>Titulo</th>
-                <th>Fecha</th>
-                <th>Preguntas</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var examen in examenes)
-            {
-                <tr>
-                    <td>@examen.Id</td>
-                    <td>@(examen.Alumno != null ? $"{examen.Alumno.Codigo} - {examen.Alumno.Nombre}" : "N/A")</td>
-                    <td>@examen.Titulo</td>
-                    <td>@examen.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>@examen.Preguntas.Count</td>
-                    <td>
-                        @* ===================================================================
-                           NAVEGACION CON PARAMETRO
-                           ===================================================================
-                           href="/examen/@examen.Id" → Blazor navega a la página
-                           DetalleExamen.razor que tiene @page "/examen/{Id:int}"
-                           El Id del examen se pasa por la URL.
-                           =================================================================== *@
-                        <a href="/examen/@examen.Id" class="btn btn-sm btn-info">
-                            <i class="fa-solid fa-eye"></i> Ver detalle
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    @* --- ENCABEZADO: Título + Botón "Crear Examen" ---
+       row: fila flexbox de Bootstrap
+       col: ocupa espacio disponible (título)
+       col-auto: se ajusta al contenido (botón) *@
+    <div class="row mb-3 align-items-center">
+        <div class="col">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-file-lines"></i> Lista de Examenes
+            </h2>
+        </div>
+        @* --- BOTON DE ACCION ---
+           Patrón Corcuera: botón en la esquina superior derecha
+           btn btn-success: botón verde de Bootstrap
+           href="/crear-examen": navega a CrearExamen.razor *@
+        <div class="col-auto">
+            <a class="btn btn-success" href="/crear-examen">
+                <i class="fa-solid fa-plus-circle"></i> Crear Examen
+            </a>
+        </div>
+    </div>
+
+    @* --- CARD CON TABLA --- *@
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <span class="text-muted">
+                @if (examenes != null)
+                {
+                    <i class="fa-solid fa-database"></i>
+                    <span> Total: <strong>@examenes.Count</strong> examenes registrados</span>
+                }
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col" class="px-4 py-3">ID</th>
+                            <th scope="col" class="px-4 py-3">Alumno</th>
+                            <th scope="col" class="px-4 py-3">Titulo</th>
+                            <th scope="col" class="px-4 py-3">Fecha</th>
+                            <th scope="col" class="px-4 py-3 text-center">Preguntas</th>
+                            @* text-end: alinea a la derecha (para los botones de acción) *@
+                            <th scope="col" class="text-end px-4 py-3">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (examenes == null)
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center p-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        else if (examenes.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted p-4">
+                                    <i class="fa-solid fa-inbox"></i> No hay examenes registrados.
+                                    <a href="/crear-examen" class="ms-2">Crear uno</a>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var examen in examenes)
+                            {
+                                <tr>
+                                    <td class="align-middle px-4 fw-bold">@examen.Id</td>
+
+                                    @* OPERADOR TERNARIO EN RAZOR: @(condicion ? valor1 : valor2)
+                                       Los paréntesis son OBLIGATORIOS cuando hay operadores.
+                                       $"texto {variable}" → string interpolation de C# *@
+                                    <td class="align-middle px-4">
+                                        <i class="fa-solid fa-user text-secondary"></i>
+                                        @(examen.Alumno != null
+                                            ? $"{examen.Alumno.Codigo} - {examen.Alumno.Nombre}"
+                                            : "N/A")
+                                    </td>
+
+                                    <td class="align-middle px-4">@examen.Titulo</td>
+
+                                    @* .ToString("dd/MM/yyyy HH:mm") → formato de fecha *@
+                                    <td class="align-middle px-4 text-muted">
+                                        <i class="fa-solid fa-calendar"></i>
+                                        @examen.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    @* BADGE: pastilla de color para resaltar valores
+                                       bg-info text-dark: fondo celeste con texto oscuro *@
+                                    <td class="align-middle px-4 text-center">
+                                        <span class="badge bg-info text-dark">
+                                            @examen.Preguntas.Count preguntas
+                                        </span>
+                                    </td>
+
+                                    @* NAVEGACION CON PARAMETRO:
+                                       href="/examen/@examen.Id" genera /examen/1, /examen/2...
+                                       DetalleExamen.razor tiene @page "/examen/{Id:int}"
+                                       y captura el ID automáticamente *@
+                                    <td class="text-end px-4">
+                                        <a href="/examen/@examen.Id" class="btn btn-sm btn-primary">
+                                            <i class="fa-solid fa-eye"></i> Ver detalle
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     private List<TestSoftModel.Examen.Examen>? examenes;
 
-    // OnInitializedAsync: ciclo de vida, se ejecuta al cargar la página
-    // El flujo completo:
-    //   ExamenBO.ListarTodos()           → interfaz inyectada
-    //   → ExamenBOImpl.ListarTodos()     → implementación registrada en DI
-    //   → ExamenImpl.ListarTodos()       → capa persistencia (DAO)
-    //   → DBManager.EjecutarProcLectura  → SP listar_examenes()
-    //   → Fase 2: carga Alumno + Preguntas por cada examen (conexiones separadas)
+    // OnInitializedAsync: se ejecuta al cargar la página
+    // Flujo: ExamenBO → ExamenBOImpl → ExamenImpl → DBManager → SP listar_examenes
+    // Luego Fase 2: carga Alumno + Preguntas por cada examen
     protected override async Task OnInitializedAsync()
     {
         examenes = ExamenBO.ListarTodos();

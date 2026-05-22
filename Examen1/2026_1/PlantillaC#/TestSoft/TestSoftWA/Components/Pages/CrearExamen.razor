@@ -1,113 +1,213 @@
 @page "/crear-examen"
 
-@* ===================================================================
+@* =====================================================================
    MULTIPLE INYECCION DE DEPENDENCIAS
-   ===================================================================
-   Se pueden inyectar tantos servicios como se necesiten.
+   =====================================================================
+   Se pueden inyectar TANTOS servicios como se necesiten.
    Cada @inject crea una variable que apunta a la implementación
    registrada en Program.cs via AddScoped.
-   =================================================================== *@
+
+   Aquí necesitamos 3 servicios porque la página:
+   1. Lista alumnos → IAlumnoBO (para el <select>)
+   2. Selecciona preguntas aleatorias → IPreguntaBO
+   3. Crea el examen → IExamenBO
+   ===================================================================== *@
 @inject TestSoftBusiness.Alumnos.BOI.IAlumnoBO AlumnoBO
 @inject TestSoftBusiness.Preguntas.BOI.IPreguntaBO PreguntaBO
 @inject TestSoftBusiness.Examenes.BOI.IExamenBO ExamenBO
 
-@* NavigationManager: servicio built-in de Blazor para navegar entre páginas *@
+@* NavigationManager: servicio BUILT-IN de Blazor (no necesita registrarse en DI)
+   Permite navegar entre páginas desde código C#:
+   Navigation.NavigateTo("/examenes") → equivale a hacer clic en un link *@
 @inject NavigationManager Navigation
 
 @rendermode InteractiveServer
 
 <PageTitle>Crear Examen</PageTitle>
 
-<h3><i class="fa-solid fa-plus-circle"></i> Crear Examen</h3>
+<div class="container mt-4">
 
-@* --- Mensaje de éxito --- *@
-@if (mensaje != null)
-{
-    <div class="alert alert-success alert-dismissible">
-        <i class="fa-solid fa-check-circle"></i> @mensaje
-        <a href="/examenes" class="btn btn-sm btn-outline-success ms-3">Ver examenes</a>
+    @* --- ENCABEZADO --- *@
+    <div class="row mb-3 align-items-center">
+        <div class="col">
+            <h2 class="mb-0">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Crear Examen
+            </h2>
+        </div>
+        @* Botón para volver a la lista *@
+        <div class="col-auto">
+            <a class="btn btn-outline-secondary" href="/examenes">
+                <i class="fa-solid fa-arrow-left"></i> Volver a la lista
+            </a>
+        </div>
     </div>
-}
 
-@if (alumnos == null)
-{
-    <p><em>Cargando alumnos...</em></p>
-}
-else
-{
-    @* ===================================================================
-       DATA BINDING con @bind
-       ===================================================================
-       @bind="idAlumnoSeleccionado" crea un TWO-WAY BINDING:
-       - Cuando el usuario selecciona una opción, la variable se actualiza
-       - Si la variable cambia desde el código, el <select> se actualiza
-       Es el equivalente a [(ngModel)] en Angular o v-model en Vue.
-       =================================================================== *@
-    <div class="mb-3">
-        <label class="form-label"><strong>Seleccionar Alumno:</strong></label>
-        <select class="form-select" @bind="idAlumnoSeleccionado">
-            <option value="0">-- Seleccione un alumno --</option>
-            @foreach (var alumno in alumnos)
+    @* =====================================================================
+       ALERT DE BOOTSTRAP — Mensaje de éxito
+       =====================================================================
+       Se muestra solo cuando 'mensaje' no es null (después de crear un examen).
+       CLASES:
+         · alert: estilo base de alerta Bootstrap
+         · alert-success: color verde (éxito)
+         · alert-dismissible: permite cerrar la alerta
+       Otras variantes: alert-danger (rojo), alert-warning (amarillo),
+                        alert-info (celeste), alert-primary (azul)
+       ===================================================================== *@
+    @if (mensaje != null)
+    {
+        <div class="alert alert-success alert-dismissible shadow-sm">
+            <i class="fa-solid fa-check-circle"></i> @mensaje
+            <a href="/examenes" class="btn btn-sm btn-outline-success ms-3">
+                <i class="fa-solid fa-eye"></i> Ver examenes
+            </a>
+        </div>
+    }
+
+    @* =====================================================================
+       CARD — FORMULARIO DE CREACION
+       =====================================================================
+       Patrón Corcuera: envolver formularios dentro de cards
+       para darles estructura visual y sombra.
+       ===================================================================== *@
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">
+                <i class="fa-solid fa-clipboard-list"></i> Datos del examen
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (alumnos == null)
             {
-                <option value="@alumno.Id">@alumno.Codigo - @alumno.Nombre</option>
+                @* Spinner mientras se cargan los alumnos *@
+                <div class="text-center p-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="text-muted mt-2">Cargando alumnos...</p>
+                </div>
             }
-        </select>
-    </div>
+            else
+            {
+                @* =====================================================================
+                   FORMULARIO CON BOOTSTRAP GRID
+                   =====================================================================
+                   row g-3: fila con gap (espacio entre columnas) de 1rem
+                   col-md-8: en pantallas medianas (≥768px) ocupa 8 de 12 columnas
+                   col-md-4: ocupa 4 de 12 columnas
+                   En móviles, ambas ocupan 12 (100% del ancho = se apilan)
+                   ===================================================================== *@
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        @* =====================================================================
+                           FORM-LABEL + FORM-SELECT — Componentes de formulario Bootstrap
+                           =====================================================================
+                           · form-label: estilo para etiquetas de campo
+                           · form-select: estilo para <select> (dropdown)
+                             Aplica bordes redondeados, padding, y estilo visual uniforme.
 
-    @* ===================================================================
-       EVENTO @onclick
-       ===================================================================
-       @onclick="GenerarExamen" llama al método C# GenerarExamen()
-       cuando el usuario hace clic en el botón.
-       disabled="@(expresion)" desactiva el botón condicionalmente.
-       Requiere @rendermode InteractiveServer para funcionar.
-       =================================================================== *@
-    <button class="btn btn-primary" @onclick="GenerarExamen"
-            disabled="@(idAlumnoSeleccionado == 0 || procesando)">
-        @if (procesando)
-        {
-            <span class="spinner-border spinner-border-sm"></span>
-            <span> Creando...</span>
-        }
-        else
-        {
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span> Generar Examen (10 preguntas aleatorias)</span>
-        }
-    </button>
-}
+                           @bind="idAlumnoSeleccionado" → TWO-WAY DATA BINDING
+                           =====================================================================
+                           ¿QUE ES @bind?
+                             Crea un enlace BIDIRECCIONAL entre el HTML y la variable C#:
+                             · Si el usuario selecciona una opción → la variable C# se actualiza
+                             · Si la variable C# cambia desde código → el <select> se actualiza
+
+                           Es el equivalente a:
+                             - v-model en Vue.js
+                             - [(ngModel)] en Angular
+                             - value + onChange en React
+
+                           SIN @bind tendrías que escribir:
+                             value="@idAlumnoSeleccionado"
+                             @onchange="(e) => idAlumnoSeleccionado = int.Parse(e.Value)"
+                           Con @bind Blazor hace todo eso automáticamente.
+                           ===================================================================== *@
+                        <label class="form-label"><strong>Seleccionar Alumno:</strong></label>
+                        <select class="form-select" @bind="idAlumnoSeleccionado">
+                            <option value="0">-- Seleccione un alumno --</option>
+                            @* @foreach genera un <option> por cada alumno en la lista.
+                               value="@alumno.Id" → valor que se asigna a idAlumnoSeleccionado
+                               El texto visible es lo que va entre <option> y </option> *@
+                            @foreach (var alumno in alumnos)
+                            {
+                                <option value="@alumno.Id">@alumno.Codigo - @alumno.Nombre</option>
+                            }
+                        </select>
+                    </div>
+
+                    @* =====================================================================
+                       BOTON CON @onclick Y disabled CONDICIONAL
+                       =====================================================================
+                       @onclick="GenerarExamen" → cuando el usuario hace clic,
+                         se ejecuta el método C# GenerarExamen() definido en @code.
+                         Requiere @rendermode InteractiveServer.
+
+                       disabled="@(expresion)" → DESACTIVACION CONDICIONAL
+                         El botón se desactiva (gris, no clickeable) cuando:
+                         · idAlumnoSeleccionado == 0 → no se ha seleccionado alumno
+                         · procesando == true → ya se está creando un examen
+
+                       d-flex align-items-end: flexbox para alinear el botón abajo
+                         de su columna (al mismo nivel que el <select>)
+                       ===================================================================== *@
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" @onclick="GenerarExamen"
+                                disabled="@(idAlumnoSeleccionado == 0 || procesando)">
+                            @if (procesando)
+                            {
+                                @* SPINNER INLINE: spinner-border-sm = versión pequeña
+                                   Se muestra DENTRO del botón mientras se procesa *@
+                                <span class="spinner-border spinner-border-sm"></span>
+                                <span> Creando...</span>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span> Generar Examen (10 preguntas)</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
 
 @code {
     // ===================================================================
     // VARIABLES DE ESTADO DEL COMPONENTE
     // ===================================================================
-    // Blazor re-renderiza la página automáticamente cuando estas cambian
+    // Blazor re-renderiza la página automáticamente cuando estas cambian.
+    // Cada vez que se modifica una variable, el framework compara el HTML
+    // anterior con el nuevo y envía SOLO los cambios al navegador.
     private List<TestSoftModel.Alumno.Alumno>? alumnos;
-    private int idAlumnoSeleccionado = 0;
-    private string? mensaje;
-    private bool procesando = false;
+    private int idAlumnoSeleccionado = 0;   // Valor del <select> (0 = ninguno)
+    private string? mensaje;                // Texto del alert de éxito (null = oculto)
+    private bool procesando = false;        // true = botón desactivado con spinner
 
     // ===================================================================
-    // CICLO DE VIDA: OnInitializedAsync
+    // OnInitializedAsync: carga los datos iniciales
     // ===================================================================
-    // Se ejecuta UNA VEZ cuando la página carga.
-    // Carga la lista de alumnos para el <select>.
     protected override async Task OnInitializedAsync()
     {
         alumnos = AlumnoBO.ListarTodos();
     }
 
     // ===================================================================
-    // METODO DEL EVENTO @onclick
+    // GenerarExamen(): METODO DEL EVENTO @onclick
     // ===================================================================
+    // Se ejecuta cuando el usuario hace clic en el botón "Generar Examen".
+    // Este método orquesta 3 llamadas a la capa de negocio:
+    //   1. Buscar el alumno seleccionado
+    //   2. Obtener 10 preguntas aleatorias
+    //   3. Crear el examen (INSERT con TRANSACCION maestro-detalle)
     private void GenerarExamen()
     {
-        procesando = true;
-        mensaje = null;
+        procesando = true;   // Activa el spinner del botón
+        mensaje = null;      // Limpia mensaje anterior
 
-        // 1. Buscar el alumno seleccionado por su ID
-        //    Flujo: AlumnoBO.BuscarPorId → AlumnoBOImpl → AlumnoImpl
-        //    → DBManager.EjecutarProcLectura("buscar_alumno_por_id")
+        // 1. Buscar alumno por ID
+        // Flujo: AlumnoBO → AlumnoBOImpl → AlumnoImpl → SP buscar_alumno_por_id
         var alumno = AlumnoBO.BuscarPorId(idAlumnoSeleccionado);
         if (alumno == null)
         {
@@ -116,17 +216,15 @@ else
             return;
         }
 
-        // 2. Seleccionar 10 preguntas aleatorias
-        //    Flujo: PreguntaBO.SeleccionarPreguntasAleatorias()
-        //    → PreguntaBOImpl: lista todas, mezcla con Random, toma 10
+        // 2. Seleccionar 10 preguntas aleatorias del banco
+        // Flujo: PreguntaBOImpl → lista todas, mezcla con Random, toma 10
         var preguntas = PreguntaBO.SeleccionarPreguntasAleatorias();
 
-        // 3. Crear el examen CON TRANSACCION
-        //    Flujo: ExamenBO.CrearExamenConPreguntas()
-        //    → ExamenBOImpl → ExamenImpl.Insertar()
-        //    → DBManager: BeginTransaction → insertar_examen (cabecera)
-        //    → loop insertar_examen_pregunta (cada detalle)
-        //    → Commit (o Rollback si falla alguno)
+        // 3. Crear el examen con TRANSACCION
+        // Flujo: ExamenBOImpl → ExamenImpl.Insertar()
+        //   → BeginTransaction → INSERT examen (cabecera)
+        //   → loop INSERT examen_pregunta (cada detalle)
+        //   → Commit (o Rollback si falla)
         ExamenBO.CrearExamenConPreguntas(alumno, $"Examen para {alumno.Codigo}", preguntas);
 
         mensaje = $"Examen creado exitosamente para {alumno.Codigo} con {preguntas.Count} preguntas.";

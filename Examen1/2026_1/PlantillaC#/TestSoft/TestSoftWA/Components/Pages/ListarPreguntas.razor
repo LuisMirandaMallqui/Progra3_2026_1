@@ -1,41 +1,91 @@
 @page "/preguntas"
 
+@* --- INYECCION DE DEPENDENCIA ---
+   Mismo patrón que ListarAlumnos: @inject <Interfaz> <Variable>
+   Blazor resuelve IPreguntaBO → PreguntaBOImpl (registrado en Program.cs) *@
 @inject TestSoftBusiness.Preguntas.BOI.IPreguntaBO PreguntaBO
+
+@* Sin esto los eventos (@onclick, @bind) NO funcionan *@
 @rendermode InteractiveServer
 
 <PageTitle>Preguntas</PageTitle>
 
-<h3><i class="fa-solid fa-clipboard-question"></i> Banco de Preguntas</h3>
+<div class="container mt-4">
 
-@if (preguntas == null)
-{
-    <p><em>Cargando preguntas...</em></p>
-}
-else if (preguntas.Count == 0)
-{
-    <p>No hay preguntas registradas.</p>
-}
-else
-{
-    <p>Total: @preguntas.Count preguntas en el banco</p>
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th style="width: 60px;">ID</th>
-                <th>Enunciado</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var pregunta in preguntas)
-            {
-                <tr>
-                    <td>@pregunta.Id</td>
-                    <td>@pregunta.Enunciado</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    @* --- ENCABEZADO --- *@
+    <div class="row mb-3 align-items-center">
+        <div class="col">
+            @* fa-clipboard-question: ícono de portapapeles con signo de pregunta *@
+            <h2 class="mb-0">
+                <i class="fa-solid fa-clipboard-question"></i> Banco de Preguntas
+            </h2>
+        </div>
+    </div>
+
+    @* --- CARD CON TABLA ---
+       Patrón Corcuera: card > card-header (info) > card-body p-0 > table-responsive > table *@
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <span class="text-muted">
+                @if (preguntas != null)
+                {
+                    <i class="fa-solid fa-database"></i>
+                    <span> Total: <strong>@preguntas.Count</strong> preguntas en el banco</span>
+                }
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            @* style="width: 80px;" → fuerza un ancho fijo para la columna ID
+                               Útil cuando quieres que la columna no se estire *@
+                            <th scope="col" class="px-4 py-3" style="width: 80px;">ID</th>
+                            <th scope="col" class="px-4 py-3">Enunciado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (preguntas == null)
+                        {
+                            @* SPINNER: mismo patrón que ListarAlumnos
+                               colspan="2" porque esta tabla tiene 2 columnas *@
+                            <tr>
+                                <td colspan="2" class="text-center p-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        else if (preguntas.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="2" class="text-center text-muted p-4">
+                                    <i class="fa-solid fa-inbox"></i> No hay preguntas registradas.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var pregunta in preguntas)
+                            {
+                                <tr>
+                                    <td class="align-middle px-4 fw-bold">@pregunta.Id</td>
+                                    <td class="align-middle px-4">
+                                        @* fa-circle-question: ícono de pregunta dentro de círculo *@
+                                        <i class="fa-solid fa-circle-question text-info"></i>
+                                        @pregunta.Enunciado
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     private List<TestSoftModel.Pregunta.Pregunta>? preguntas;
