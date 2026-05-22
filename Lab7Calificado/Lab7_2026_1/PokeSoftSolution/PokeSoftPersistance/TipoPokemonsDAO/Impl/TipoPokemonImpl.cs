@@ -38,11 +38,12 @@ namespace PokeSoftPersistance.TipoPokemonsDAO.Impl
                 cmd.Parameters.Add("p_id_tipo", MySqlDbType.Int32).Direction = ParameterDirection.Output;
 
                 //en lugar de lector = cmd.ExecuteReader(); 
-                object valor = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery(); // ejecutamos por si solo (solo devuelve listas afectadas)
+                object valor = cmd.Parameters["p_id_tipo"].Value;
                 if (valor != null && valor != DBNull.Value)
                 {
                     tipoPokemon = new TipoPokemon();
-                    tipoPokemon.IdTipoPokemon = Int32.Parse(valor.ToString());
+                    tipoPokemon.IdTipoPokemon = Convert.ToInt32(valor);
                     tipoPokemon.Nombre = nombre;
                 }
                 
