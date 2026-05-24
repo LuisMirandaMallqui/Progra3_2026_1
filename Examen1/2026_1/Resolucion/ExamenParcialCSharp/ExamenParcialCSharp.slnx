@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="GestionAlumnosBusiness/GestionAlumnosBusiness.csproj" Id="c5e5949a-4ba5-4e23-ba12-b45c2449a931" />
+  <Project Path="GestionAlumnosDBManager/GestionAlumnosDBManager.csproj" Id="3708a694-2bb6-4e9a-9ce8-70b82a604bd3" />
+  <Project Path="GestionAlumnosModel/GestionAlumnosModel.csproj" Id="106b60b5-58bf-4387-9cd1-cdc01428ba72" />
+  <Project Path="GestionAlumnosPersistance/GestionAlumnosPersistance.csproj" Id="4ff06fc4-29ba-48ec-8db9-7db4755ccced" />
+  <Project Path="GestionAlumnosWebApp/GestionAlumnosWebApp.csproj" />
+</Solution>

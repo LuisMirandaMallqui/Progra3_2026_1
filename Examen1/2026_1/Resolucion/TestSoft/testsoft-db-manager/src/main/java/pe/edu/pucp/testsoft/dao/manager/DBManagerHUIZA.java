@@ -1,0 +1,54 @@
+package pe.edu.pucp.testsoft.dao.manager;
+
+import pe.edu.pucp.testsoft.dao.manager.utils.CadenaConexion;
+import pe.edu.pucp.testsoft.dao.manager.utils.TipoDB;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+/*
+* DB Manager usado en el turno 0684
+* */
+public abstract class DBManagerHUIZA {
+    protected String host;
+    protected int puerto;
+    protected String esquema;
+    protected String usuario;
+    protected String password;
+    protected TipoDB tipoDB;
+
+    protected DBManagerHUIZA() {}
+
+    protected DBManagerHUIZA(String host, int puerto, String esquema,
+                        String usuario,
+                        String password, TipoDB tipoDB) {
+
+        try {
+            this.host = host;
+            this.puerto = puerto;
+            this.esquema = esquema;
+            this.usuario = usuario;
+            this.password = password;
+            this.tipoDB = tipoDB;
+        }
+        catch (Exception ex) {
+            System.err.println("Hubo un error al configurar al configurar la "
+                    + "conexion a la base de datos: " + ex.getMessage());
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public abstract Connection getConnection() throws SQLException,
+            ClassNotFoundException;
+
+    protected String cadenaConexion() {
+        CadenaConexion cadena = new CadenaConexion.Builder()
+                .tipoDB(this.tipoDB)
+                .servidor(this.host)
+                .puerto(this.puerto)
+                .schema(this.esquema)
+                .build();
+
+        return cadena.toString();
+    }
+}
