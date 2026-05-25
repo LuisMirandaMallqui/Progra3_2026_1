@@ -1,16 +1,26 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\GestionAlumnosBusiness\GestionAlumnosBusiness.csproj" />
-    <ProjectReference Include="..\GestionAlumnosDBManager\GestionAlumnosDBManager.csproj" />
-    <ProjectReference Include="..\GestionAlumnosModel\GestionAlumnosModel.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.8" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.8" />
+		<PackageReference Include="System.Security.Permissions" Version="10.0.8" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<ProjectReference Include="..\GestionAlumnosBusiness\GestionAlumnosBusiness.csproj" />
+		<ProjectReference Include="..\GestionAlumnosDBManager\GestionAlumnosDBManager.csproj" />
+		<ProjectReference Include="..\GestionAlumnosModel\GestionAlumnosModel.csproj" />
+	</ItemGroup>
 
 </Project>

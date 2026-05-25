@@ -1,4 +1,16 @@
 @page "/"
+@* ⚠️ SIN @rendermode InteractiveServer, los @onclick no hacen nada.
+   Blazor renderiza la página como HTML estático (SSR) y no hay conexión activa.
+   SIEMPRE ponerlo en páginas que usen eventos o interactividad. *@
+@rendermode InteractiveServer
+
+@* ✅ Orden correcto: primero @using, luego @inject.
+   Si pones @inject antes del @using del tipo que inyectas, puede fallar la compilación. *@
+@using GestionAlumnosModel.Alumno
+@using GestionAlumnosBusiness.Alumnos.BOI
+
+@inject IAlumnoBO AlumnoBO
+@inject NavigationManager Navigation
 
 <PageTitle>Listado de Alumnos</PageTitle>
 
@@ -14,21 +26,28 @@
     <div class="row mb-3 align-items-center">
         <div class="col-md-4">
             <div class="input-group">
-                <button class="input-group-text bg-dark text-white border-0">
+                @* ✅ @onclick en botón debe apuntar a método void o Task.
+                   Error anterior: apuntaba a un método que retornaba Alumno → no compila.
+                   @onclick no sabe qué hacer con un valor de retorno. *@
+                <button class="input-group-text bg-dark text-white border-0" @onclick="BuscarPorNombreApellido">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11"/>
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11" />
                     </svg>
                 </button>
+                @* ✅ @bind conecta el input a la variable C#.
+                   Error anterior: se usó @onsubmit= (que no existe en <input>) sin valor.
+                   @onsubmit es de <form>, no de <input>. Para capturar texto usar @bind. *@
                 <input type="text"
                        id="filtroAlumno"
                        class="form-control"
-                       placeholder="Buscar por nombre o apellido..." />
+                       placeholder="Buscar por nombre o apellido..."
+                       @bind="texto" />
             </div>
         </div>
         <div class="col-auto">
-            <button class="btn btn-primary">
+            <button @onclick="() => RegisrarAlumno()" class="btn btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
                 </svg>
                 Registrar
             </button>
@@ -50,41 +69,97 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>20210043</td>
-                        <td>María</td>
-                        <td>González</td>
-                        <td>maria.gonzalez@pucp.pe</td>
-                        <td class="text-center"><span class="badge bg-success">Sí</span></td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-warning">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>20230018</td>
-                        <td>Carlos</td>
-                        <td>Pérez</td>
-                        <td>carlos.perez@pucp.pe</td>
-                        <td class="text-center"><span class="badge bg-success">Sí</span></td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-warning">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>20200071</td>
-                        <td>Lucía</td>
-                        <td>Ramírez</td>
-                        <td>lucia.ramirez@pucp.pe</td>
-                        <td class="text-center"><span class="badge bg-danger">No</span></td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-outline-warning">Editar</button>
-                        </td>
-                    </tr>
+                    @* ✅ Patrón null vs vacío:
+                       null  = todavía no se cargó → mostrar spinner
+                       vacío = se cargó pero no hay datos → mostrar mensaje *@
+                    @if (alumnos == null)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center p-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    else if (alumnos.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted p-4">
+                                <i class="fa-solid fa-inbox"></i> No hay Alumnos registrados.
+                                @* ✅ <a> sin href necesita style="cursor:pointer;" para mostrar la manita.
+                                   Alternativa más simple: usar <button class="btn btn-link"> *@
+                                <button @onclick="RegisrarAlumno" class="btn btn-link ms-2 p-0">Registrar uno</button>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var alumno in alumnos)
+                        {
+                            <tr>
+                                <td>@alumno.Id</td>
+                                <td>@alumno.Codigo</td>
+                                <td>@alumno.Nombre</td>
+                                <td>@alumno.Apellidos</td>
+                                <td>@alumno.Correo</td>
+                                @* ✅ Estado es char → comparar con comillas simples 'A'.
+                                   Error anterior: .Equals("A") compara char con string → siempre false. *@
+                                @if (alumno.Estado == 'A')
+                                {
+                                    <td class="text-center"><span class="badge bg-success">Sí</span></td>
+                                }
+                                else
+                                {
+                                    <td class="text-center"><span class="badge bg-danger">No</span></td>
+                                }
+                                @* ✅ Lambda () => necesaria cuando pasas parámetros al método.
+                                   Sin lambda: @onclick="EditarAlumno" (sin parámetros).
+                                   Con parámetro: @onclick="() => EditarAlumno(alumno.Id)". *@
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-warning" @onclick="() => EditarAlumno(alumno.Id)">Editar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+@code {
+    private List<Alumno>? alumnos;
+    private string texto = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarAlumnos();
+    }
+
+    @* ✅ Extraer la carga a un método propio permite reutilizarlo
+       tanto en OnInitializedAsync como en BuscarPorNombreApellido sin repetir código. *@
+    private async Task CargarAlumnos()
+    {
+        @* ✅ Task.Run() es necesario en Blazor Server para llamadas síncronas a BD.
+           Sin él, la llamada bloquea el hilo de render y la UI se congela. *@
+        alumnos = await Task.Run(() => AlumnoBO.BuscarPorNombreApellido(texto.Trim()));
+    }
+
+    private async Task BuscarPorNombreApellido()
+    {
+        await CargarAlumnos();
+    }
+
+    protected void RegisrarAlumno()
+    {
+        Navigation.NavigateTo("/alumno/registro");
+    }
+
+    private void EditarAlumno(int id)
+    {
+        @* ✅ Pasar el ID por la URL permite que la página de registro
+           detecte si es insertar (Id=0) o editar (Id>0). *@
+        Navigation.NavigateTo($"/alumno/registro/{id}");
+    }
+}

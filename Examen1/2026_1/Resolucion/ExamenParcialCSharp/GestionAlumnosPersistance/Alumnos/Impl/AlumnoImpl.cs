@@ -21,43 +21,40 @@ namespace GestionAlumnosPersistance.Alumnos.Impl
     {
         public int Insertar(Alumno alumno)
         {
-            // Crear array de parámetros (3 IN + 1 OUT = 4 total)
-            DbParameter[] parametros = new DbParameter[4];
+            DbParameter[] parametros = new DbParameter[6];
 
-            // CreateParam(nombre, tipo, valor, dirección)
             // Los nombres DEBEN coincidir con los del SP en MySQL
-            parametros[0] = DBManager.Instance.CreateParam("p_codigo", DbType.String, alumno.Codigo, ParameterDirection.Input);
-            parametros[1] = DBManager.Instance.CreateParam("p_nombre", DbType.String, alumno.Nombre, ParameterDirection.Input);
-            parametros[2] = DBManager.Instance.CreateParam("p_correo", DbType.String, alumno.Correo, ParameterDirection.Input);
+            parametros[1] = DBManager.Instance.CreateParam("p_codigo", DbType.String, alumno.Codigo, ParameterDirection.Input);
+            parametros[2] = DBManager.Instance.CreateParam("p_nombre", DbType.String, alumno.Nombre, ParameterDirection.Input);
+            parametros[3] = DBManager.Instance.CreateParam("p_apellidos", DbType.String, alumno.Apellidos, ParameterDirection.Input);
+            parametros[4] = DBManager.Instance.CreateParam("p_correo", DbType.String, alumno.Correo, ParameterDirection.Input);
+            parametros[5] = DBManager.Instance.CreateParam("p_estado", DbType.String, alumno.Estado, ParameterDirection.Input);
 
             // Parámetro OUTPUT: valor = null, dirección = Output
             // Después de ejecutar el SP, este parámetro contendrá el ID generado
-            parametros[3] = DBManager.Instance.CreateParam("p_id", DbType.Int32, null, ParameterDirection.Output);
+            parametros[0] = DBManager.Instance.CreateParam("p_id", DbType.Int32, null, ParameterDirection.Output);
 
             // EjecutarProcedimiento → para INSERT/UPDATE/DELETE (no retorna DataReader)
-            DBManager.Instance.EjecutarProcedimiento("insertar_alumno", parametros);
+            DBManager.Instance.EjecutarProcedimiento("SP_INSERTAR_ALUMNO", parametros);
 
             // Leer el valor OUT: el ID que la BD generó con auto_increment
-            alumno.Id = Convert.ToInt32(parametros[3].Value);
+            alumno.Id = Convert.ToInt32(parametros[0].Value);
             return alumno.Id;
         }
 
         public int Modificar(Alumno alumno)
         {
-            DbParameter[] parametros = new DbParameter[4];
+            DbParameter[] parametros = new DbParameter[6];
             parametros[0] = DBManager.Instance.CreateParam("p_id", DbType.Int32, alumno.Id, ParameterDirection.Input);
             parametros[1] = DBManager.Instance.CreateParam("p_codigo", DbType.String, alumno.Codigo, ParameterDirection.Input);
             parametros[2] = DBManager.Instance.CreateParam("p_nombre", DbType.String, alumno.Nombre, ParameterDirection.Input);
-            parametros[3] = DBManager.Instance.CreateParam("p_correo", DbType.String, alumno.Correo, ParameterDirection.Input);
+            parametros[3] = DBManager.Instance.CreateParam("p_apellidos", DbType.String, alumno.Apellidos, ParameterDirection.Input);
+            parametros[4] = DBManager.Instance.CreateParam("p_correo", DbType.String, alumno.Correo, ParameterDirection.Input);
+            parametros[5] = DBManager.Instance.CreateParam("p_estado", DbType.String, alumno.Estado, ParameterDirection.Input);
 
-            return DBManager.Instance.EjecutarProcedimiento("modificar_alumno", parametros);
+            return DBManager.Instance.EjecutarProcedimiento("SP_MODIFICAR_ALUMNO", parametros);
         }
 
-        // =============================================================
-        // ELIMINAR — Solo necesita el ID
-        // =============================================================
-        // SP: eliminar_alumno(IN p_id)
-        // =============================================================
         public int Eliminar(int id)
         {
             DbParameter[] parametros = new DbParameter[1];
@@ -74,9 +71,8 @@ namespace GestionAlumnosPersistance.Alumnos.Impl
             parametros[0] = DBManager.Instance.CreateParam("p_id", DbType.Int32, id, ParameterDirection.Input);
 
             // 'using' cierra el DataReader al salir del bloque
-            using DbDataReader lector = DBManager.Instance.EjecutarProcedimientoLectura("buscar_alumno_por_id", parametros);
+            using DbDataReader lector = DBManager.Instance.EjecutarProcedimientoLectura("SP_OBTENER_ALUMNO_POR_ID", parametros);
 
-            // lector.Read() → avanza a la siguiente fila. Retorna false si no hay más.
             // Para BuscarPorId, esperamos 0 o 1 fila, por eso usamos 'if' en vez de 'while'.
             if (lector.Read())
             {
@@ -84,27 +80,37 @@ namespace GestionAlumnosPersistance.Alumnos.Impl
                 alumno.Id = lector.GetInt32(lector.GetOrdinal("id"));
                 alumno.Codigo = lector.GetString(lector.GetOrdinal("codigo"));
                 alumno.Nombre = lector.GetString(lector.GetOrdinal("nombre"));
+                alumno.Apellidos = lector.GetString(lector.GetOrdinal("apellidos"));
                 alumno.Correo = lector.GetString(lector.GetOrdinal("correo"));
+                alumno.Estado = lector.GetChar(lector.GetOrdinal("estado"));
+                return alumno;
             }
-            return alumno;
+            return null;
         }
 
         public List<Alumno> ListarTodos()
         {
             List<Alumno> lista = new List<Alumno>();
-
+            
+            DbParameter[] parametros = new DbParameter[1];
+            // Parámetro 1: IN — el nombre a buscar, en este caso vacio para listar todos
+            String artificio = ""; 
+            parametros[0] = DBManager.Instance.CreateParam("p_texto", DbType.String, artificio, ParameterDirection.Input);
             // null como parámetros → el SP no recibe parámetros
-            using DbDataReader lector = DBManager.Instance.EjecutarProcedimientoLectura("listar_alumnos", null);
+            using DbDataReader lector = DBManager.Instance.EjecutarProcedimientoLectura("SP_LISTAR_ALUMNOS_X_NOMBRE_APELLIDO", parametros);
 
             // while → recorre TODAS las filas
             while (lector.Read())
             {
-                Alumno a = new Alumno();
-                a.Id = lector.GetInt32(lector.GetOrdinal("id"));
-                a.Codigo = lector.GetString(lector.GetOrdinal("codigo"));
-                a.Nombre = lector.GetString(lector.GetOrdinal("nombre"));
-                a.Correo = lector.GetString(lector.GetOrdinal("correo"));
-                lista.Add(a);
+                Alumno alumno = new Alumno();
+                alumno.Id = lector.GetInt32(lector.GetOrdinal("id"));
+                alumno.Codigo = lector.GetString(lector.GetOrdinal("codigo"));
+                alumno.Nombre = lector.GetString(lector.GetOrdinal("nombre"));
+                alumno.Apellidos = lector.GetString(lector.GetOrdinal("apellidos"));
+                alumno.Correo = lector.GetString(lector.GetOrdinal("correo"));
+                alumno.Estado= lector.GetChar(lector.GetOrdinal("estado"));
+
+                lista.Add(alumno);
             }
             return lista;
         }
@@ -132,14 +138,30 @@ namespace GestionAlumnosPersistance.Alumnos.Impl
             return Convert.ToInt32(parametros[1].Value);
         }
 
-        public Alumno BuscarPorNombre(String nombre)
+        public List<Alumno> BuscarPorNombreApellido(String texto)
         {
+            List<Alumno> alumnos = new List<Alumno>();
 
-        }
+            DbParameter[] parametros = new DbParameter[1];
+            parametros[0] = DBManager.Instance.CreateParam("p_texto", DbType.String, texto, ParameterDirection.Input);
 
-        public Alumno BuscarPorApellido(String apellido)
-        {
+            // 'using' cierra el DataReader al salir del bloque
+            using DbDataReader lector = DBManager.Instance.EjecutarProcedimientoLectura("SP_LISTAR_ALUMNOS_X_NOMBRE_APELLIDO", parametros);
 
+            // lector.Read() → avanza a la siguiente fila. Retorna false si no hay más.
+            while (lector.Read())
+            {
+                Alumno alumno = new Alumno();
+                alumno = new Alumno();
+                alumno.Id = lector.GetInt32(lector.GetOrdinal("id"));
+                alumno.Codigo = lector.GetString(lector.GetOrdinal("codigo"));
+                alumno.Nombre = lector.GetString(lector.GetOrdinal("nombre"));
+                alumno.Apellidos = lector.GetString(lector.GetOrdinal("apellidos"));
+                alumno.Correo = lector.GetString(lector.GetOrdinal("correo"));
+                alumno.Estado = lector.GetChar(lector.GetOrdinal("estado"));
+                alumnos.Add(alumno);
+            }
+            return alumnos;
         }
     }
 }

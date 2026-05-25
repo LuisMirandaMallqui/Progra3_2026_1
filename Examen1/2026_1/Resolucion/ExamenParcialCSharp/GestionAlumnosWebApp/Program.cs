@@ -1,11 +1,27 @@
 using GestionAlumnosWebApp.Components;
 using GestionAlumnosDBManager;
+using GestionAlumnosBusiness.Alumnos.BOI;
+using GestionAlumnosBusiness.Alumnos.BO;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Blazor Server
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// INYECCIÓN DE DEPENDENCIAS
+// Es un patrón donde no instancias las clases directamente (new AlumnoBOImpl())
+// sino que le dices al framework "cuando alguien pida IAlumnoBO, dale un AlumnoBOImpl"
+// y el framework se encarga de crear y administrar la instancia.
+// SIRVE:
+// Desacoplamieanto: Componentes Razor solo conocen la INTERFAZ, no la clase
+// Testeabilida
+// Testeabilidad 
+// Ciclo de vida controlado: Scoped = una instanca por request
+//
+
+builder.Services.AddScoped<IAlumnoBO, AlumnoBOImpl>();
 
 // DB
 // Lee la configuración del archivo appsettings.json

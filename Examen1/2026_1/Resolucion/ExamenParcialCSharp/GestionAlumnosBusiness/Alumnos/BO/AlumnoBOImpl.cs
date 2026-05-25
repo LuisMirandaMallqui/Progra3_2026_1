@@ -4,7 +4,7 @@ using GestionAlumnosPersistance.Alumnos.DAO;
 using GestionAlumnosPersistance.Alumnos.Impl;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace TestSoftBusiness.Alumnos.BO
+namespace GestionAlumnosBusiness.Alumnos.BO
 {
     public class AlumnoBOImpl : IAlumnoBO
     {
@@ -16,14 +16,11 @@ namespace TestSoftBusiness.Alumnos.BO
         public Alumno BuscarPorId(int id) => alumnoDAO.BuscarPorId(id);
         public List<Alumno> ListarTodos() => alumnoDAO.ListarTodos();
         public int BuscarPorCodigo(string codigo) => alumnoDAO.BuscarPorCodigo(codigo);
-        public int BuscarPorNombre(string nombre)
+        public List<Alumno> BuscarPorNombreApellido(string texto)
         {
-            return alumnoDAO.BuscarPorNombre(nombre); 
+            return alumnoDAO.BuscarPorNombreApellido(texto); 
         }
-        public int BuscarPorApellido(string apellido)
-        {
-            return alumnoDAO.BuscarPorApellido(apellido); 
-        }
+        
 
     }
 }

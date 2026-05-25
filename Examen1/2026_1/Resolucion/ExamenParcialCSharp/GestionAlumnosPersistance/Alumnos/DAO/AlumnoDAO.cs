@@ -7,5 +7,6 @@ namespace GestionAlumnosPersistance.Alumnos.DAO
     {
         // Patron SELECT INTO: busca por codigo y retorna el id (0 si no existe)
         int BuscarPorCodigo(string codigo);
+        List<Alumno> BuscarPorNombreApellido(string texto);
     }
 }
