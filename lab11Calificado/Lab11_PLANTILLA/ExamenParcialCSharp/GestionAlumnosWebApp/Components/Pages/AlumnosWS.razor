@@ -1,0 +1,103 @@
+@page "/alumnos-ws"
+@* ⚠ Sin @rendermode InteractiveServer los @onclick no disparan nada. *@
+@rendermode InteractiveServer
+
+@using GestionAlumnosModel.Alumno
+@using GestionAlumnosWebApp.Services.Rest
+@using GestionAlumnosWebApp.Services.Soap
+
+@* ✅ Inyectamos los CLIENTES de WS (no el BO local): los datos vienen de GlassFish. *@
+@inject AlumnoRestClient Rest
+@inject AlumnoSoapClient Soap
+
+<PageTitle>Alumnos vía Web Services</PageTitle>
+
+<div class="container mt-5">
+    <h1 class="fw-bold">Alumnos (consumidos del WS Java)</h1>
+
+    @if (mensaje is not null)
+    {
+        <div class="alert @(esError ? "alert-danger" : "alert-success")">@mensaje</div>
+    }
+
+    @* ── 1) LISTAR por REST ─────────────────────────────────────── *@
+    <button class="btn btn-primary mb-3" @onclick="CargarRest">Listar por REST</button>
+
+    @if (alumnos is not null)
+    {
+        <table class="table table-striped">
+            <thead><tr><th>#</th><th>Código</th><th>Nombre</th><th>Apellidos</th><th>Correo</th><th>Estado</th></tr></thead>
+            <tbody>
+                @foreach (var a in alumnos)
+                {
+                    <tr><td>@a.Id</td><td>@a.Codigo</td><td>@a.Nombre</td><td>@a.Apellidos</td><td>@a.Correo</td><td>@a.Estado</td></tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <hr />
+
+    @* ── 2) ENVIAR un objeto: insertar el mismo Alumno por REST o por SOAP ── *@
+    <h5>Registrar alumno (envía el objeto completo)</h5>
+    <div class="row g-2 mb-2" style="max-width:720px;">
+        <div class="col"><input class="form-control" placeholder="Código"    @bind="nuevo.Codigo" /></div>
+        <div class="col"><input class="form-control" placeholder="Nombre"    @bind="nuevo.Nombre" /></div>
+        <div class="col"><input class="form-control" placeholder="Apellidos" @bind="nuevo.Apellidos" /></div>
+        <div class="col"><input class="form-control" placeholder="Correo"    @bind="nuevo.Correo" /></div>
+    </div>
+    <button class="btn btn-success me-2"  @onclick="InsertarRest">Insertar por REST (POST JSON)</button>
+    <button class="btn btn-outline-success" @onclick="InsertarSoap">Insertar por SOAP (sobre XML)</button>
+
+    <hr />
+
+    @* ── 3) RECIBIR un objeto: buscar por id vía SOAP ───────────── *@
+    <div class="input-group mb-3" style="max-width:360px;">
+        <span class="input-group-text">Buscar id (SOAP)</span>
+        <input class="form-control" type="number" @bind="idBuscar" />
+        <button class="btn btn-outline-secondary" @onclick="BuscarSoap">Buscar</button>
+    </div>
+    @if (alumnoSoap is not null)
+    {
+        <div class="alert alert-info">SOAP devolvió: <b>@alumnoSoap.Codigo</b> — @alumnoSoap.Nombre @alumnoSoap.Apellidos</div>
+    }
+</div>
+
+@code {
+    private List<Alumno>? alumnos;
+    private Alumno? alumnoSoap;
+    private Alumno nuevo = new() { Estado = 'A' };
+    private int idBuscar = 1;
+    private string? mensaje;
+    private bool esError;
+
+    @* ✅ try/catch SIEMPRE al consumir WS: si GlassFish está caído, mensaje claro, no render roto. *@
+    private async Task CargarRest()
+    {
+        try { alumnos = await Rest.ListarTodos(); Ok($"REST trajo {alumnos.Count} alumnos."); }
+        catch (Exception ex) { Err("REST falló: " + ex.Message); }
+    }
+
+    // Enviar objeto por REST: el body JSON lleva el Alumno entero.
+    private async Task InsertarRest()
+    {
+        try { int id = await Rest.Insertar(nuevo); Ok($"REST insertó id={id}."); await CargarRest(); }
+        catch (Exception ex) { Err("REST insertar falló: " + ex.Message); }
+    }
+
+    // Enviar objeto por SOAP: el cliente arma el <alumno> anidado en el sobre.
+    private async Task InsertarSoap()
+    {
+        try { int id = await Soap.Insertar(nuevo); Ok($"SOAP insertó id={id}."); await CargarRest(); }
+        catch (Exception ex) { Err("SOAP insertar falló: " + ex.Message); }
+    }
+
+    private async Task BuscarSoap()
+    {
+        try { alumnoSoap = await Soap.BuscarPorId(idBuscar); if (alumnoSoap is null) Err("No existe."); }
+        catch (Exception ex) { Err("SOAP falló: " + ex.Message); }
+    }
+
+    private void Ok(string m)  { mensaje = m; esError = false; }
+    private void Err(string m) { mensaje = m; esError = true; }
+}

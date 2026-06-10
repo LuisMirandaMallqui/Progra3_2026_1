@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- UN solo WAR con SOAP + REST, igual que el SoftProgServicios del profe Paz -->
+  <parent>
+    <groupId>pe.edu.pucp.testsoft</groupId>
+    <artifactId>TestSoftSolution</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>TestSoftServicios</artifactId>
+  <name>TestSoftServicios</name>
+  <packaging>war</packaging>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.target>25</maven.compiler.target>
+    <maven.compiler.source>25</maven.compiler.source>
+  </properties>
+
+  <dependencies>
+    <!-- Driver: viaja al WAR (runtime) -->
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>9.6.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Capas propias -->
+    <dependency>
+      <groupId>pe.edu.pucp.testsoft</groupId>
+      <artifactId>TestSoftModel</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>pe.edu.pucp.testsoft</groupId>
+      <artifactId>TestSoftBusiness</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>pe.edu.pucp.testsoft</groupId>
+      <artifactId>TestSoftPersistance</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>pe.edu.pucp.testsoft</groupId>
+      <artifactId>TestSoftDBManager</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+    <!-- APIs Jakarta provistas por GlassFish (SOAP + REST + servlet) -->
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>4.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.ws</groupId>
+      <artifactId>jakarta.xml.ws-api</artifactId>
+      <version>4.0.2</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>TestSoftServicios</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.4.0</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

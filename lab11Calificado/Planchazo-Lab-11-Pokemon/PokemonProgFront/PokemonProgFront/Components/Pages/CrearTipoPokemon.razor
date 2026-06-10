@@ -1,0 +1,108 @@
+﻿@page "/crear-tipo-pokemon"
+@rendermode InteractiveServer
+
+@using PokemonProgFront.Models
+@using PokemonProgFront.Services
+@inject TipoPokemonAppService TipoPokemonService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Crear Tipo Pokemon</PageTitle>
+
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Catálogo</p>
+        <h1>Crear Tipo Pokemon</h1>
+        <p>Registra nuevos tipos para asociarlos a tus pokemones.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(mensaje))
+{
+    <div class="alert @claseMensaje">
+        @mensaje
+    </div>
+}
+
+<div class="form-card">
+    <div class="mb-3">
+        <label class="form-label">Nombre del tipo</label>
+        <input class="form-control" @bind="tipoPokemon.Nombre" placeholder="Ejemplo: Agua" />
+    </div>
+
+    <div class="form-actions">
+        <button class="btn btn-success" @onclick="Guardar">
+            Guardar
+        </button>
+
+        <button class="btn btn-secondary" @onclick="Cancelar">
+            Cancelar
+        </button>
+    </div>
+</div>
+
+<div class="table-wrapper mt-4">
+    <h4>Tipos registrados</h4>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var tipo in tipos)
+            {
+                <tr>
+                    <td>@tipo.IdTipoPokemon</td>
+                    <td>@tipo.Nombre</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private TipoPokemon tipoPokemon = new();
+    private List<TipoPokemon> tipos = new();
+
+    private string mensaje = string.Empty;
+    private string claseMensaje = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tipos = await TipoPokemonService.Listar();
+    }
+
+    private async Task Guardar()
+    {
+        if (string.IsNullOrWhiteSpace(tipoPokemon.Nombre))
+        {
+            mensaje = "Debe ingresar el nombre del tipo de pokemon.";
+            claseMensaje = "alert-danger";
+            return;
+        }
+
+        int resultado = await TipoPokemonService.Insertar(tipoPokemon);
+
+        if (resultado > 0)
+        {
+            mensaje = "Tipo de pokemon registrado correctamente.";
+            claseMensaje = "alert-success";
+
+            tipoPokemon = new TipoPokemon();
+            tipos = await TipoPokemonService.Listar();
+        }
+        else
+        {
+            mensaje = "El tipo de pokemon que quieres insertar ya existe.";
+            claseMensaje = "alert-danger";
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo("/pokemones");
+    }
+}

@@ -1,0 +1,203 @@
+@page "/alumno/registro"
+@* ✅ Segunda ruta con parámetro: misma página para insertar y editar.
+   {Id:int} indica que el parámetro es entero. Si no viene → Id=0 → modo insertar. *@
+@page "/alumno/registro/{Id:int}"
+
+@rendermode InteractiveServer
+
+@* ✅ Orden correcto: @using antes de @inject.
+   Error anterior: @inject estaba antes del @using del tipo inyectado → error de compilación. *@
+@using GestionAlumnosBusiness.Alumnos.BOI
+@using GestionAlumnosModel.Alumno
+
+@inject NavigationManager Navigation
+@inject IAlumnoBO AlumnoBO
+
+<PageTitle>@(Id == 0 ? "Registrar Alumno" : "Editar Alumno")</PageTitle>
+
+<div class="container mt-5" style="max-width: 700px;">
+
+    <!-- Encabezado -->
+    <div class="mb-4">
+        @* ✅ <a> sin href necesita style="cursor:pointer;" para mostrar la manita del mouse. *@
+        <a @onclick="ListarAlumnos" class="btn btn-outline-secondary btn-sm mb-3" style="cursor:pointer;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+            </svg>
+            Volver al listado
+        </a>
+        @* ✅ Operador ternario para cambiar el título según el modo. *@
+        <h1 class="fw-bold">@(Id == 0 ? "Registrar Alumno" : "Editar Alumno")</h1>
+        <p class="text-muted">Complete los datos para @(Id == 0 ? "registrar un nuevo alumno" : "modificar el alumno seleccionado").</p>
+    </div>
+
+    <!-- Formulario -->
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form id="formRegistroAlumno" novalidate>
+
+                <!-- Código -->
+                <div class="mb-3">
+                    <label for="codigo" class="form-label fw-semibold">Código</label>
+                    @* ✅ @bind debe estar DENTRO del tag, antes del cierre />.
+                       Error anterior: el tag cerraba con /> y el @bind quedaba flotando afuera. *@
+                    <input type="text"
+                           id="codigo"
+                           name="codigo"
+                           class="form-control"
+                           placeholder="Ej: 20240012"
+                           maxlength="8"
+                           pattern="\d{8}"
+                           @bind="codigo" />
+                    <div class="form-text">8 dígitos. Los primeros 4 corresponden al año de ingreso (2020–2025).</div>
+                </div>
+
+                <!-- Nombre y Apellido en la misma fila -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label fw-semibold">Nombre</label>
+                        <input type="text"
+                               id="nombre"
+                               name="nombre"
+                               class="form-control"
+                               placeholder="Ej: María"
+                               maxlength="250"
+                               @bind="nombre" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="apellido" class="form-label fw-semibold">Apellido</label>
+                        @* ✅ Cada campo debe bindear a su propia variable.
+                           Error anterior: este campo tenía @bind="nombre" igual que el de arriba
+                           → sobreescribía nombre con el apellido, y apellidos quedaba siempre vacío en BD. *@
+                        <input type="text"
+                               id="apellido"
+                               name="apellido"
+                               class="form-control"
+                               placeholder="Ej: González"
+                               maxlength="250"
+                               @bind="apellidos" />
+                    </div>
+                </div>
+
+                <!-- Correo -->
+                <div class="mb-3">
+                    <label for="correo" class="form-label fw-semibold">Correo electrónico</label>
+                    <div class="input-group">
+                        @* ✅ Solo se guarda la parte local del correo (antes del @).
+                           Al guardar se concatena "@pucp.pe". Al cargar para editar se quita con Replace.
+                           Error anterior: al editar se cargaba el correo completo y Guardar volvía a concatenar
+                           → "luis.miranda@pucp.pe@pucp.pe" en la BD. *@
+                        <input type="text"
+                               id="correoUsuario"
+                               name="correoUsuario"
+                               class="form-control"
+                               placeholder="nombre.apellido"
+                               maxlength="100"
+                               @bind="correo" />
+                        <span class="input-group-text bg-light text-muted">pucp.pe</span>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold d-block">Estado</label>
+                    <div class="form-check form-switch">
+                        @* ✅ Con @bind no usar también el atributo "checked".
+                           El valor inicial se controla desde la variable en @code (activo = true).
+                           Tener ambos juntos puede generar conflictos. *@
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="activo"
+                               name="activo"
+                               @bind="activo" />
+                        <label class="form-check-label" for="activo">Alumno activo</label>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex gap-2 justify-content-end">
+                    <a @onclick="LimpiarCampos" class="btn btn-outline-secondary" style="cursor:pointer;">Limpiar</a>
+
+                    @* ✅ type="button" en vez de type="submit".
+                       Error anterior: type="submit" causa un reload completo de la página
+                       en un <form> HTML normal → el método Guardar nunca se ejecutaba. *@
+                    <button type="button" @onclick="Guardar" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy me-1" viewBox="0 0 16 16">
+                            <path d="M11 2H9v3h2z" />
+                            <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v3.5A1.5 1.5 0 0 1 11.5 6h-7A1.5 1.5 0 0 1 3 4.5V1H1.5a.5.5 0 0 0-.5.5m3 0v3.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1z" />
+                        </svg>
+                        Guardar
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@code {
+    @* ✅ [Parameter] expone la propiedad como parámetro de ruta.
+       Blazor lo llena automáticamente desde la URL: /alumno/registro/5 → Id = 5.
+       Sin [Parameter] la propiedad siempre queda en 0. *@
+    [Parameter]
+    public int Id { get; set; }
+
+    private string codigo    = string.Empty;
+    private string nombre    = string.Empty;
+    private string apellidos = string.Empty;
+    private string correo    = string.Empty;
+    @* ✅ Valor inicial true → checkbox marcado por defecto al registrar. *@
+    private bool   activo    = true;
+
+    private void ListarAlumnos()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        @* ✅ Si Id != 0 es edición: cargar datos existentes para prellenar el formulario.
+           @bind funciona en ambos sentidos: Blazor ve que la variable tiene valor y lo muestra en el input. *@
+        if (Id != 0)
+        {
+            Alumno alumno = await Task.Run(() => AlumnoBO.BuscarPorId(Id));
+            codigo    = alumno.Codigo;
+            nombre    = alumno.Nombre;
+            apellidos = alumno.Apellidos;
+            @* ✅ Quitar el sufijo al cargar para que Guardar no lo duplique al concatenar. *@
+            correo    = alumno.Correo.Replace("@pucp.pe", "");
+            activo    = alumno.Estado == 'A';
+        }
+    }
+
+    private void LimpiarCampos()
+    {
+        codigo    = string.Empty;
+        nombre    = string.Empty;
+        apellidos = string.Empty;
+        correo    = string.Empty;
+        activo    = true;
+    }
+
+    private void Guardar()
+    {
+        Alumno alumno = new Alumno();
+        @* ✅ alumno.Id = Id es obligatorio para Modificar.
+           Error anterior: faltaba esta línea → el SP UPDATE no sabía qué fila actualizar. *@
+        alumno.Id        = Id;
+        alumno.Codigo    = codigo;
+        alumno.Nombre    = nombre;
+        alumno.Apellidos = apellidos;
+        alumno.Correo    = correo + "@pucp.pe";
+        @* ✅ Convertir bool a char para la BD. La convención A/I se define aquí. *@
+        alumno.Estado    = activo ? 'A' : 'I';
+
+        @* ✅ Una sola página maneja insertar y editar según si vino con ID o no. *@
+        if (Id == 0)
+            AlumnoBO.Insertar(alumno);
+        else
+            AlumnoBO.Modificar(alumno);
+
+        Navigation.NavigateTo("/");
+    }
+}

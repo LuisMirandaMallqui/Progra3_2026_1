@@ -16,6 +16,9 @@ using GestionAlumnosWebApp.Components;
 using GestionAlumnosDBManager;
 using GestionAlumnosBusiness.Alumnos.BOI;
 using GestionAlumnosBusiness.Alumnos.BO;
+// ===== INTEGRACIÓN WS =====
+using GestionAlumnosWebApp.Services.Rest;
+using GestionAlumnosWebApp.Services.Soap;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +40,22 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<IAlumnoBO, AlumnoBOImpl>();
 
+// ===== INTEGRACIÓN WS (SOAP + REST) =====
+// El front puede leer de la BD por DOS vías:
+//   (a) Local: IAlumnoBO -> Business -> DBManager  (lo de arriba, sin red)
+//   (b) Remoto: consumiendo el WS Java desplegado en GlassFish (REST/SOAP)
+//
+// REST: HttpClient TIPADO. La BaseAddress apunta al @ApplicationPath("webresources") del WAR Java.
+//        OJO: la base DEBE terminar en "/" para que la ruta relativa ("webresources/AlumnoRS") se concatene bien.
+builder.Services.AddHttpClient<AlumnoRestClient>(c =>
+{
+    c.BaseAddress = new Uri("http://localhost:8080/TestSoftServicios/");
+});
+// SOAP (camino manual): HttpClient simple; la URL del endpoint vive dentro del cliente.
+builder.Services.AddHttpClient<AlumnoSoapClient>();
+// SOAP (camino oficial con Add Service Reference): se registraría el proxy generado, p.ej.
+//   builder.Services.AddScoped<AlumnoWSRef.AlumnoWSClient>();
+
 // DB
 // Lee la configuración del archivo appsettings.json
 IConfiguration configuration = new ConfigurationBuilder()
@@ -55,31 +74,4 @@ if (tipoMotorBD == "mysql")
         ?? throw new Exception("No se encontro MySqlConnection en appsettings.json.");
 else if (tipoMotorBD == "mssql")
     connectionString = configuration.GetConnectionString("MSSQLConnection")
-        ?? throw new Exception("No se encontro MSSQLConnection en appsettings.json.");
-else
-    throw new Exception("tipoBD debe ser 'mysql' o 'mssql'.");
-
-// Inicializa el Singleton — solo se ejecuta UNA VEZ
-// Después de esto, cualquier DAO puede usar: DBManager.Instance.EjecutarProcedimiento(...)
-Console.WriteLine($"Conectando a BD ({tipoMotorBD}): {connectionString}");
-DBManager.Initialize(connectionString, tipoMotorBD);
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
-
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
-app.Run();
+        ?? throw 

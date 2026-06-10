@@ -1,0 +1,145 @@
+﻿@page "/crear-pokemon"
+@rendermode InteractiveServer
+
+@using PokemonProgFront.Models
+@using PokemonProgFront.Services
+@inject PokemonAppService PokemonService
+@inject TipoPokemonAppService TipoPokemonService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Crear Pokemon</PageTitle>
+
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Registro</p>
+        <h1>Crear Pokemon</h1>
+        <p>Completa los datos del nuevo pokemon.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(mensaje))
+{
+    <div class="alert @claseMensaje">
+        @mensaje
+    </div>
+}
+
+<div class="form-card">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Nombre</label>
+            <input class="form-control" @bind="pokemon.Nombre" placeholder="Ejemplo: Bulbasaur" />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Tipo Pokemon</label>
+
+            <select class="form-select" @bind="pokemon.StringTipoPokemon">
+                <option value="">Seleccione un tipo</option>
+
+                @foreach (var tipo in tipos)
+                {
+                    <option value="@tipo.Nombre">@tipo.Nombre</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Altura</label>
+            <input type="number" step="0.01" class="form-control" @bind="pokemon.Altura" />
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Peso</label>
+            <input type="number" step="0.01" class="form-control" @bind="pokemon.Peso" />
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Estado evolutivo</label>
+            <select class="form-select" @bind="pokemon.EstadoEvolutivo">
+                @foreach (var estado in Enum.GetValues<EstadoEvolutivo>())
+                {
+                    <option value="@estado">@estado</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-control" rows="4" @bind="pokemon.Descripcion"
+                      placeholder="Descripción corta del pokemon"></textarea>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button class="btn btn-success" @onclick="Guardar">
+            Guardar
+        </button>
+
+        <button class="btn btn-secondary" @onclick="Cancelar">
+            Cancelar
+        </button>
+    </div>
+</div>
+
+@code {
+    private Pokemon pokemon = new();
+    private List<TipoPokemon> tipos = new();
+
+    private string mensaje = string.Empty;
+    private string claseMensaje = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tipos = await TipoPokemonService.Listar();
+        pokemon.EstadoEvolutivo = EstadoEvolutivo.BASICO;
+    }
+
+    private async Task Guardar()
+    {
+        if (string.IsNullOrWhiteSpace(pokemon.Nombre))
+        {
+            mensaje = "Debe ingresar el nombre del pokemon.";
+            claseMensaje = "alert-danger";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(pokemon.StringTipoPokemon))
+        {
+            mensaje = "Debe seleccionar un tipo de pokemon.";
+            claseMensaje = "alert-danger";
+            return;
+        }
+
+        if (pokemon.Altura <= 0)
+        {
+            mensaje = "La altura debe ser mayor que cero.";
+            claseMensaje = "alert-danger";
+            return;
+        }
+
+        if (pokemon.Peso <= 0)
+        {
+            mensaje = "El peso debe ser mayor que cero.";
+            claseMensaje = "alert-danger";
+            return;
+        }
+
+        int resultado = await PokemonService.Insertar(pokemon);
+
+        if (resultado > 0)
+        {
+            NavigationManager.NavigateTo("/pokemones");
+        }
+        else
+        {
+            mensaje = "No se pudo insertar el pokemon. Verifique que el tipo exista.";
+            claseMensaje = "alert-danger";
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavigationManager.NavigateTo("/pokemones");
+    }
+}

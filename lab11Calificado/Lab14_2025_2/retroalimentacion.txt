@@ -1,0 +1,11 @@
+Comentarios de retroalimentación	
+Luis Miranda	 
+Puntos	20223796	Observaciones
+Conexión a la base de datos MySQL y SQL Server	2	2	 
+Persistencia de la tabla Vehículo	2	2	 
+Persistencia de la tabla Propietario	2	2	 
+Capa de Negocios	2	1	No hay validaciones ni reglas de negocio reales, solo delegación al DAO. No hay manejo de excepciones de negocio.
+Servicio RESTful para Vehículo	4	1.5	Se separó POST y PUT en lugar de un solo POST con lógica de upsert como se pedía. No hay validaciones.
+Servicio RESTful para Propietario	4	3	El servicio de listado funciona, pero no se incluye la información de los vehículos relacionados con el propietario como se indicaba en el requerimiento.
+Cliente RESTful	4	0	No se implementó el cliente RESTful.
+20	11.5	 

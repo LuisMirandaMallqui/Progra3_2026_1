@@ -1,0 +1,206 @@
+﻿@page "/pokemones"
+@rendermode InteractiveServer
+
+@using PokemonProgFront.Models
+@using PokemonProgFront.Services
+@inject PokemonAppService PokemonService
+@inject TipoPokemonAppService TipoPokemonService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Pokemones</PageTitle>
+
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Pokédex</p>
+        <h1>Gestión de Pokemones</h1>
+        <p>Visualiza, busca y filtra los pokemones registrados.</p>
+    </div>
+
+    <div class="header-actions">
+        <button class="btn btn-success" @onclick="IrCrearPokemon">
+            + Crear Pokemon
+        </button>
+
+        <button class="btn btn-outline-success" @onclick="IrCrearTipoPokemon">
+            + Crear Tipo
+        </button>
+    </div>
+</div>
+
+<div class="filter-card">
+    <h5>Filtros de búsqueda</h5>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Nombre</label>
+            <input class="form-control" @bind="filtroNombre" placeholder="Ejemplo: Pikachu" />
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" @bind="filtroTipo">
+                <option value="0">Todos</option>
+                @foreach (var tipo in tipos)
+                {
+                    <option value="@tipo.IdTipoPokemon">@tipo.Nombre</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Estado evolutivo</label>
+            <select class="form-select" @bind="filtroEstado">
+                <option value="">Todos</option>
+                @foreach (var estado in Enum.GetValues<EstadoEvolutivo>())
+                {
+                    <option value="@estado">@estado</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <button class="btn btn-primary me-2" @onclick="AplicarFiltros">
+        Filtrar
+    </button>
+
+    <button class="btn btn-secondary" @onclick="LimpiarFiltros">
+        Limpiar
+    </button>
+</div>
+
+@if (pokemonesFiltrados.Count == 0)
+{
+    <div class="empty-state">
+        <h4>No se encontraron pokemones</h4>
+        <p>Prueba cambiando los filtros o registra un nuevo pokemon.</p>
+    </div>
+}
+else
+{
+    <div class="pokemon-grid">
+        @foreach (var pokemon in pokemonesFiltrados)
+        {
+            <div class="pokemon-card">
+                <div class="pokemon-card-top">
+                    <span class="pokemon-id">#@pokemon.IdPokemon</span>
+                    <span class="type-pill">@ObtenerNombreTipo(pokemon.IdTipoPokemon)</span>
+                </div>
+
+                <div class="pokemon-avatar">
+                    @pokemon.Nombre.Substring(0, 1).ToUpper()
+                </div>
+
+                <h3>@pokemon.Nombre</h3>
+
+                <p class="pokemon-description">
+                    @pokemon.Descripcion
+                </p>
+
+                <div class="pokemon-stats">
+                    <div>
+                        <strong>@pokemon.Altura</strong>
+                        <span>Altura</span>
+                    </div>
+
+                    <div>
+                        <strong>@pokemon.Peso</strong>
+                        <span>Peso</span>
+                    </div>
+
+                    <div>
+                        <strong>@pokemon.EstadoEvolutivo</strong>
+                        <span>Estado</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="table-wrapper mt-4">
+        <h4>Tabla de pokemones</h4>
+
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Altura</th>
+                    <th>Peso</th>
+                    <th>Estado evolutivo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var pokemon in pokemonesFiltrados)
+                {
+                    <tr>
+                        <td>@pokemon.IdPokemon</td>
+                        <td>@pokemon.Nombre</td>
+                        <td>@ObtenerNombreTipo(pokemon.IdTipoPokemon)</td>
+                        <td>@pokemon.Altura</td>
+                        <td>@pokemon.Peso</td>
+                        <td>@pokemon.EstadoEvolutivo</td>
+                        <td>@pokemon.Descripcion</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Pokemon> pokemonesFiltrados = new();
+    private List<TipoPokemon> tipos = new();
+
+    private string filtroNombre = string.Empty;
+    private int filtroTipo = 0;
+    private string filtroEstado = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tipos = await TipoPokemonService.Listar();
+        pokemonesFiltrados = await PokemonService.Listar();
+    }
+
+    private async Task AplicarFiltros()
+    {
+        EstadoEvolutivo? estado = null;
+
+        if (!string.IsNullOrWhiteSpace(filtroEstado))
+        {
+            estado = Enum.Parse<EstadoEvolutivo>(filtroEstado);
+        }
+
+        int? tipo = filtroTipo == 0 ? null : filtroTipo;
+
+        pokemonesFiltrados = await PokemonService.Filtrar(filtroNombre, tipo, estado);
+    }
+
+    private async Task LimpiarFiltros()
+    {
+        filtroNombre = string.Empty;
+        filtroTipo = 0;
+        filtroEstado = string.Empty;
+
+        pokemonesFiltrados = await PokemonService.Listar();
+    }
+
+    private string ObtenerNombreTipo(int idTipoPokemon)
+    {
+        TipoPokemon? tipo = tipos.FirstOrDefault(t => t.IdTipoPokemon == idTipoPokemon);
+
+        return tipo == null ? "Sin tipo" : tipo.Nombre;
+    }
+
+    private void IrCrearPokemon()
+    {
+        NavigationManager.NavigateTo("/crear-pokemon");
+    }
+
+    private void IrCrearTipoPokemon()
+    {
+        NavigationManager.NavigateTo("/crear-tipo-pokemon");
+    }
+}
