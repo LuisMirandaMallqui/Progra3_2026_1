@@ -1,0 +1,551 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace CSharpRestClient
+{
+    public class UniversidadSOAPManager
+    {
+        // =========================
+        // FACULTADES
+        // =========================
+        public List<FacultadDTO> ListarFacultads()
+        {
+            FacultadWSReference.FacultadWSClient ws = new FacultadWSReference.FacultadWSClient();
+            var listaSoap = ws.listarFacultades();
+            return (listaSoap ?? Array.Empty<FacultadWSReference.FacultadDTO>()).Select(ToFront).ToList();
+        }
+
+        public FacultadDTO BuscarFacultadPorId(int id)
+        {
+            FacultadWSReference.FacultadWSClient ws = new FacultadWSReference.FacultadWSClient();
+            var item = ws.buscarFacultadPorId(id);
+            return item == null ? new FacultadDTO() : ToFront(item);
+        }
+
+        public int InsertarFacultad(FacultadDTO dto)
+        {
+            FacultadWSReference.FacultadWSClient ws = new FacultadWSReference.FacultadWSClient();
+            return ws.insertarFacultad(ToSoapFacultad(dto));
+        }
+
+        public int ModificarFacultad(FacultadDTO dto)
+        {
+            FacultadWSReference.FacultadWSClient ws = new FacultadWSReference.FacultadWSClient();
+            return ws.modificarFacultad(dto.Id, ToSoapFacultad(dto));
+        }
+
+        public int EliminarFacultad(int id)
+        {
+            FacultadWSReference.FacultadWSClient ws = new FacultadWSReference.FacultadWSClient();
+            return ws.eliminarFacultad(id);
+        }
+
+        // =========================
+        // ESPECIALIDADES
+        // =========================
+        public List<EspecialidadDTO> ListarEspecialidads()
+        {
+            EspecialidadWSReference.EspecialidadWSClient ws = new EspecialidadWSReference.EspecialidadWSClient();
+            var listaSoap = ws.listarEspecialidades();
+            return (listaSoap ?? Array.Empty<EspecialidadWSReference.EspecialidadDTO>()).Select(ToFront).ToList();
+        }
+
+        public EspecialidadDTO BuscarEspecialidadPorId(int id)
+        {
+            EspecialidadWSReference.EspecialidadWSClient ws = new EspecialidadWSReference.EspecialidadWSClient();
+            var item = ws.buscarEspecialidadPorId(id);
+            return item == null ? new EspecialidadDTO() : ToFront(item);
+        }
+
+        public int InsertarEspecialidad(EspecialidadDTO dto)
+        {
+            EspecialidadWSReference.EspecialidadWSClient ws = new EspecialidadWSReference.EspecialidadWSClient();
+            return ws.insertarEspecialidad(ToSoapEspecialidad(dto));
+        }
+
+        public int ModificarEspecialidad(EspecialidadDTO dto)
+        {
+            EspecialidadWSReference.EspecialidadWSClient ws = new EspecialidadWSReference.EspecialidadWSClient();
+            return ws.modificarEspecialidad(dto.Id, ToSoapEspecialidad(dto));
+        }
+
+        public int EliminarEspecialidad(int id)
+        {
+            EspecialidadWSReference.EspecialidadWSClient ws = new EspecialidadWSReference.EspecialidadWSClient();
+            return ws.eliminarEspecialidad(id);
+        }
+
+        // =========================
+        // ESTUDIANTES
+        // =========================
+        public List<EstudianteDTO> ListarEstudiantes()
+        {
+            EstudianteWSReference.EstudianteWSClient ws = new EstudianteWSReference.EstudianteWSClient();
+            var listaSoap = ws.listarEstudiantes();
+            return (listaSoap ?? Array.Empty<EstudianteWSReference.EstudianteDTO>()).Select(ToFront).ToList();
+        }
+
+        public EstudianteDTO BuscarEstudiantePorId(int id)
+        {
+            EstudianteWSReference.EstudianteWSClient ws = new EstudianteWSReference.EstudianteWSClient();
+            var item = ws.buscarEstudiantePorId(id);
+            return item == null ? new EstudianteDTO() : ToFront(item);
+        }
+
+        public int InsertarEstudiante(EstudianteDTO dto)
+        {
+            EstudianteWSReference.EstudianteWSClient ws = new EstudianteWSReference.EstudianteWSClient();
+            return ws.insertarEstudiante(ToSoapEstudiante(dto));
+        }
+
+        public int ModificarEstudiante(EstudianteDTO dto)
+        {
+            EstudianteWSReference.EstudianteWSClient ws = new EstudianteWSReference.EstudianteWSClient();
+            return ws.modificarEstudiante(dto.Id, ToSoapEstudiante(dto));
+        }
+
+        public int EliminarEstudiante(int id)
+        {
+            EstudianteWSReference.EstudianteWSClient ws = new EstudianteWSReference.EstudianteWSClient();
+            return ws.eliminarEstudiante(id);
+        }
+
+        // =========================
+        // DEPARTAMENTOS
+        // =========================
+        public List<DepartamentoDTO> ListarDepartamentos()
+        {
+            DepartamentoWSReference.DepartamentoWSClient ws = new DepartamentoWSReference.DepartamentoWSClient();
+            var listaSoap = ws.listarDepartamentos();
+            return (listaSoap ?? Array.Empty<DepartamentoWSReference.DepartamentoDTO>()).Select(ToFront).ToList();
+        }
+
+        public DepartamentoDTO BuscarDepartamentoPorId(int id)
+        {
+            DepartamentoWSReference.DepartamentoWSClient ws = new DepartamentoWSReference.DepartamentoWSClient();
+            var item = ws.buscarDepartamentoPorId(id);
+            return item == null ? new DepartamentoDTO() : ToFront(item);
+        }
+
+        public int InsertarDepartamento(DepartamentoDTO dto)
+        {
+            DepartamentoWSReference.DepartamentoWSClient ws = new DepartamentoWSReference.DepartamentoWSClient();
+            return ws.insertarDepartamento(ToSoapDepartamento(dto));
+        }
+
+        public int ModificarDepartamento(DepartamentoDTO dto)
+        {
+            DepartamentoWSReference.DepartamentoWSClient ws = new DepartamentoWSReference.DepartamentoWSClient();
+            return ws.modificarDepartamento(dto.Id, ToSoapDepartamento(dto));
+        }
+
+        public int EliminarDepartamento(int id)
+        {
+            DepartamentoWSReference.DepartamentoWSClient ws = new DepartamentoWSReference.DepartamentoWSClient();
+            return ws.eliminarDepartamento(id);
+        }
+
+        // =========================
+        // DOCENTES
+        // =========================
+        public List<DocenteDTO> ListarDocentes()
+        {
+            DocenteWSReference.DocenteWSClient ws = new DocenteWSReference.DocenteWSClient();
+            var listaSoap = ws.listarDocentes();
+            return (listaSoap ?? Array.Empty<DocenteWSReference.DocenteDTO>()).Select(ToFront).ToList();
+        }
+
+        public DocenteDTO BuscarDocentePorId(int id)
+        {
+            DocenteWSReference.DocenteWSClient ws = new DocenteWSReference.DocenteWSClient();
+            var item = ws.buscarDocentePorId(id);
+            return item == null ? new DocenteDTO() : ToFront(item);
+        }
+
+        public int InsertarDocente(DocenteDTO dto)
+        {
+            DocenteWSReference.DocenteWSClient ws = new DocenteWSReference.DocenteWSClient();
+            return ws.insertarDocente(ToSoapDocente(dto));
+        }
+
+        public int ModificarDocente(DocenteDTO dto)
+        {
+            DocenteWSReference.DocenteWSClient ws = new DocenteWSReference.DocenteWSClient();
+            return ws.modificarDocente(dto.Id, ToSoapDocente(dto));
+        }
+
+        public int EliminarDocente(int id)
+        {
+            DocenteWSReference.DocenteWSClient ws = new DocenteWSReference.DocenteWSClient();
+            return ws.eliminarDocente(id);
+        }
+
+        // =========================
+        // AULAS
+        // =========================
+        public List<AulaDTO> ListarAulas()
+        {
+            AulaWSReference.AulaWSClient ws = new AulaWSReference.AulaWSClient();
+            var listaSoap = ws.listarAulas();
+            return (listaSoap ?? Array.Empty<AulaWSReference.AulaDTO>()).Select(ToFront).ToList();
+        }
+
+        public AulaDTO BuscarAulaPorId(int id)
+        {
+            AulaWSReference.AulaWSClient ws = new AulaWSReference.AulaWSClient();
+            var item = ws.buscarAulaPorId(id);
+            return item == null ? new AulaDTO() : ToFront(item);
+        }
+
+        public int InsertarAula(AulaDTO dto)
+        {
+            AulaWSReference.AulaWSClient ws = new AulaWSReference.AulaWSClient();
+            return ws.insertarAula(ToSoapAula(dto));
+        }
+
+        public int ModificarAula(AulaDTO dto)
+        {
+            AulaWSReference.AulaWSClient ws = new AulaWSReference.AulaWSClient();
+            return ws.modificarAula(dto.Id, ToSoapAula(dto));
+        }
+
+        public int EliminarAula(int id)
+        {
+            AulaWSReference.AulaWSClient ws = new AulaWSReference.AulaWSClient();
+            return ws.eliminarAula(id);
+        }
+
+        // =========================
+        // CURSOS
+        // =========================
+        public List<CursoDTO> ListarCursos()
+        {
+            CursoWSReference.CursoWSClient ws = new CursoWSReference.CursoWSClient();
+            var listaSoap = ws.listarCursos();
+            return (listaSoap ?? Array.Empty<CursoWSReference.CursoDTO>()).Select(ToFront).ToList();
+        }
+
+        public CursoDTO BuscarCursoPorId(int id)
+        {
+            CursoWSReference.CursoWSClient ws = new CursoWSReference.CursoWSClient();
+            var item = ws.buscarCursoPorId(id);
+            return item == null ? new CursoDTO() : ToFront(item);
+        }
+
+        public int InsertarCurso(CursoDTO dto)
+        {
+            CursoWSReference.CursoWSClient ws = new CursoWSReference.CursoWSClient();
+            return ws.insertarCurso(ToSoapCurso(dto));
+        }
+
+        public int ModificarCurso(CursoDTO dto)
+        {
+            CursoWSReference.CursoWSClient ws = new CursoWSReference.CursoWSClient();
+            return ws.modificarCurso(dto.Id, ToSoapCurso(dto));
+        }
+
+        public int EliminarCurso(int id)
+        {
+            CursoWSReference.CursoWSClient ws = new CursoWSReference.CursoWSClient();
+            return ws.eliminarCurso(id);
+        }
+
+        // =========================
+        // HORARIOS DE CURSO
+        // =========================
+        public List<HorarioCursoDTO> ListarHorarioCursos()
+        {
+            HorarioCursoWSReference.HorarioCursoWSClient ws = new HorarioCursoWSReference.HorarioCursoWSClient();
+            var listaSoap = ws.listarHorariosCurso();
+            return (listaSoap ?? Array.Empty<HorarioCursoWSReference.HorarioCursoDTO>()).Select(ToFront).ToList();
+        }
+
+        public HorarioCursoDTO BuscarHorarioCursoPorId(int id)
+        {
+            HorarioCursoWSReference.HorarioCursoWSClient ws = new HorarioCursoWSReference.HorarioCursoWSClient();
+            var item = ws.buscarHorarioCursoPorId(id);
+            return item == null ? new HorarioCursoDTO() : ToFront(item);
+        }
+
+        public int InsertarHorarioCurso(HorarioCursoDTO dto)
+        {
+            HorarioCursoWSReference.HorarioCursoWSClient ws = new HorarioCursoWSReference.HorarioCursoWSClient();
+            return ws.insertarHorarioCurso(ToSoapHorarioCurso(dto));
+        }
+
+        public int ModificarHorarioCurso(HorarioCursoDTO dto)
+        {
+            HorarioCursoWSReference.HorarioCursoWSClient ws = new HorarioCursoWSReference.HorarioCursoWSClient();
+            return ws.modificarHorarioCurso(dto.Id, ToSoapHorarioCurso(dto));
+        }
+
+        public int EliminarHorarioCurso(int id)
+        {
+            HorarioCursoWSReference.HorarioCursoWSClient ws = new HorarioCursoWSReference.HorarioCursoWSClient();
+            return ws.eliminarHorarioCurso(id);
+        }
+
+        // =========================
+        // DETALLES DE HORARIO
+        // =========================
+        public List<HorarioCursoDetDTO> ListarHorarioCursoDets()
+        {
+            HorarioCursoDetWSReference.HorarioCursoDetWSClient ws = new HorarioCursoDetWSReference.HorarioCursoDetWSClient();
+            var listaSoap = ws.listarHorariosCursoDet();
+            return (listaSoap ?? Array.Empty<HorarioCursoDetWSReference.HorarioCursoDetDTO>()).Select(ToFront).ToList();
+        }
+
+        public HorarioCursoDetDTO BuscarHorarioCursoDetPorId(int id)
+        {
+            HorarioCursoDetWSReference.HorarioCursoDetWSClient ws = new HorarioCursoDetWSReference.HorarioCursoDetWSClient();
+            var item = ws.buscarHorarioCursoDetPorId(id);
+            return item == null ? new HorarioCursoDetDTO() : ToFront(item);
+        }
+
+        public int InsertarHorarioCursoDet(HorarioCursoDetDTO dto)
+        {
+            HorarioCursoDetWSReference.HorarioCursoDetWSClient ws = new HorarioCursoDetWSReference.HorarioCursoDetWSClient();
+            return ws.insertarHorarioCursoDet(ToSoapHorarioCursoDet(dto));
+        }
+
+        public int ModificarHorarioCursoDet(HorarioCursoDetDTO dto)
+        {
+            HorarioCursoDetWSReference.HorarioCursoDetWSClient ws = new HorarioCursoDetWSReference.HorarioCursoDetWSClient();
+            return ws.modificarHorarioCursoDet(dto.Id, ToSoapHorarioCursoDet(dto));
+        }
+
+        public int EliminarHorarioCursoDet(int id)
+        {
+            HorarioCursoDetWSReference.HorarioCursoDetWSClient ws = new HorarioCursoDetWSReference.HorarioCursoDetWSClient();
+            return ws.eliminarHorarioCursoDet(id);
+        }
+
+        // =========================
+        // MATRÍCULAS
+        // =========================
+        public List<MatriculaDTO> ListarMatriculas()
+        {
+            MatriculaWSReference.MatriculaWSClient ws = new MatriculaWSReference.MatriculaWSClient();
+            var listaSoap = ws.listarMatriculas();
+            return (listaSoap ?? Array.Empty<MatriculaWSReference.MatriculaDTO>()).Select(ToFront).ToList();
+        }
+
+        public MatriculaDTO BuscarMatriculaPorId(int id)
+        {
+            MatriculaWSReference.MatriculaWSClient ws = new MatriculaWSReference.MatriculaWSClient();
+            var item = ws.buscarMatriculaPorId(id);
+            return item == null ? new MatriculaDTO() : ToFront(item);
+        }
+
+        public int InsertarMatricula(MatriculaDTO dto)
+        {
+            MatriculaWSReference.MatriculaWSClient ws = new MatriculaWSReference.MatriculaWSClient();
+            return ws.insertarMatricula(ToSoapMatricula(dto));
+        }
+
+        public int ModificarMatricula(MatriculaDTO dto)
+        {
+            MatriculaWSReference.MatriculaWSClient ws = new MatriculaWSReference.MatriculaWSClient();
+            return ws.modificarMatricula(dto.Id, ToSoapMatricula(dto));
+        }
+
+        public int EliminarMatricula(int id)
+        {
+            MatriculaWSReference.MatriculaWSClient ws = new MatriculaWSReference.MatriculaWSClient();
+            return ws.eliminarMatricula(id);
+        }
+
+        // =========================
+        // EVALUACIONES
+        // =========================
+        public List<EvaluacionDTO> ListarEvaluacions()
+        {
+            EvaluacionWSReference.EvaluacionWSClient ws = new EvaluacionWSReference.EvaluacionWSClient();
+            var listaSoap = ws.listarEvaluaciones();
+            return (listaSoap ?? Array.Empty<EvaluacionWSReference.EvaluacionDTO>()).Select(ToFront).ToList();
+        }
+
+        public EvaluacionDTO BuscarEvaluacionPorId(int id)
+        {
+            EvaluacionWSReference.EvaluacionWSClient ws = new EvaluacionWSReference.EvaluacionWSClient();
+            var item = ws.buscarEvaluacionPorId(id);
+            return item == null ? new EvaluacionDTO() : ToFront(item);
+        }
+
+        public int InsertarEvaluacion(EvaluacionDTO dto)
+        {
+            EvaluacionWSReference.EvaluacionWSClient ws = new EvaluacionWSReference.EvaluacionWSClient();
+            return ws.insertarEvaluacion(ToSoapEvaluacion(dto));
+        }
+
+        public int ModificarEvaluacion(EvaluacionDTO dto)
+        {
+            EvaluacionWSReference.EvaluacionWSClient ws = new EvaluacionWSReference.EvaluacionWSClient();
+            return ws.modificarEvaluacion(dto.Id, ToSoapEvaluacion(dto));
+        }
+
+        public int EliminarEvaluacion(int id)
+        {
+            EvaluacionWSReference.EvaluacionWSClient ws = new EvaluacionWSReference.EvaluacionWSClient();
+            return ws.eliminarEvaluacion(id);
+        }
+
+        // =========================
+        // NOTAS
+        // =========================
+        public List<NotaDTO> ListarNotas()
+        {
+            NotaWSReference.NotaWSClient ws = new NotaWSReference.NotaWSClient();
+            var listaSoap = ws.listarNotas();
+            return (listaSoap ?? Array.Empty<NotaWSReference.NotaDTO>()).Select(ToFront).ToList();
+        }
+
+        public NotaDTO BuscarNotaPorId(int id)
+        {
+            NotaWSReference.NotaWSClient ws = new NotaWSReference.NotaWSClient();
+            var item = ws.buscarNotaPorId(id);
+            return item == null ? new NotaDTO() : ToFront(item);
+        }
+
+        public int InsertarNota(NotaDTO dto)
+        {
+            NotaWSReference.NotaWSClient ws = new NotaWSReference.NotaWSClient();
+            return ws.insertarNota(ToSoapNota(dto));
+        }
+
+        public int ModificarNota(NotaDTO dto)
+        {
+            NotaWSReference.NotaWSClient ws = new NotaWSReference.NotaWSClient();
+            return ws.modificarNota(dto.Id, ToSoapNota(dto));
+        }
+
+        public int EliminarNota(int id)
+        {
+            NotaWSReference.NotaWSClient ws = new NotaWSReference.NotaWSClient();
+            return ws.eliminarNota(id);
+        }
+
+        public double CalcularPromedioFinal(int idMatricula, int idHorarioCurso)
+        {
+            NotaWSReference.NotaWSClient ws = new NotaWSReference.NotaWSClient();
+            return ws.calcularPromedioFinal(idMatricula, idHorarioCurso);
+        }
+
+        // =========================
+        // MATRÍCULA - HORARIO
+        // =========================
+        public List<MatriculaHorarioDTO> ListarMatriculaHorarios()
+        {
+            MatriculaHorarioWSReference.MatriculaHorarioWSClient ws = new MatriculaHorarioWSReference.MatriculaHorarioWSClient();
+            var listaSoap = ws.listarMatriculaHorarios();
+            return (listaSoap ?? Array.Empty<MatriculaHorarioWSReference.MatriculaHorarioDTO>()).Select(ToFront).ToList();
+        }
+
+        public int InsertarMatriculaHorario(MatriculaHorarioDTO dto)
+        {
+            MatriculaHorarioWSReference.MatriculaHorarioWSClient ws = new MatriculaHorarioWSReference.MatriculaHorarioWSClient();
+            return ws.insertarMatriculaHorario(ToSoapMatriculaHorario(dto));
+        }
+
+        public int InsertarMatriculaHorarioValidado(MatriculaHorarioDTO dto)
+        {
+            MatriculaHorarioWSReference.MatriculaHorarioWSClient ws = new MatriculaHorarioWSReference.MatriculaHorarioWSClient();
+            return ws.insertarMatriculaHorarioValidado(ToSoapMatriculaHorario(dto));
+        }
+
+        // ===============================================================
+        // SOAP -> FRONT
+        // ===============================================================
+        private FacultadDTO ToFront(FacultadWSReference.FacultadDTO x) => new FacultadDTO { Id = ToInt(x.id), Nombre = x.nombre, Activo = x.activo };
+        private DepartamentoDTO ToFront(DepartamentoWSReference.DepartamentoDTO x) => new DepartamentoDTO { Id = ToInt(x.id), Nombre = x.nombre, Activo = x.activo };
+        private AulaDTO ToFront(AulaWSReference.AulaDTO x) => new AulaDTO { Id = ToInt(x.id), CodigoAula = x.codigoAula, Ubicacion = x.ubicacion, Activo = x.activo };
+
+        private EspecialidadDTO ToFront(EspecialidadWSReference.EspecialidadDTO x) => new EspecialidadDTO { Id = ToInt(x.id), Facultad = x.facultad == null ? null : new FacultadDTO { Id = ToInt(x.facultad.id), Nombre = x.facultad.nombre, Activo = x.facultad.activo }, Nombre = x.nombre, Activo = x.activo };
+        private EstudianteDTO ToFront(EstudianteWSReference.EstudianteDTO x) => new EstudianteDTO { Id = ToInt(x.id), Especialidad = x.especialidad == null ? null : ToFrontEspecialidad(x.especialidad), CodigoUniversitario = x.codigoUniversitario, Nombres = x.nombres, Apellidos = x.apellidos, CorreoInstitucional = x.correoInstitucional, Activo = x.activo };
+        private DocenteDTO ToFront(DocenteWSReference.DocenteDTO x) => new DocenteDTO { Id = ToInt(x.id), Departamento = x.departamento == null ? null : ToFrontDepartamento(x.departamento), Codigo = x.codigo, NombreCompleto = x.nombreCompleto, Categoria = x.categoria, Dedicacion = x.dedicacion, Activo = x.activo };
+        private CursoDTO ToFront(CursoWSReference.CursoDTO x) => new CursoDTO { Id = ToInt(x.id), Especialidad = x.especialidad == null ? null : ToFrontEspecialidad(x.especialidad), Codigo = x.codigo, Nombre = x.nombre, Creditos = x.creditos, NivelAcademico = x.nivelAcademico, EstadoCurso = x.estadoCurso, Activo = x.activo };
+        private HorarioCursoDTO ToFront(HorarioCursoWSReference.HorarioCursoDTO x) => ToFrontHorarioCurso(x);
+        private HorarioCursoDetDTO ToFront(HorarioCursoDetWSReference.HorarioCursoDetDTO x) => new HorarioCursoDetDTO { Id = ToInt(x.id), HorarioCurso = x.horarioCurso == null ? null : ToFrontHorarioCurso(x.horarioCurso), TipoSesion = x.tipoSesion, DiaSemana = x.diaSemana.ToString(), HoraInicio = x.horaInicio, HoraFin = x.horaFin, Aula = x.aula == null ? null : ToFrontAula(x.aula), Frecuencia = x.frecuencia };
+        private MatriculaDTO ToFront(MatriculaWSReference.MatriculaDTO x) => new MatriculaDTO { Id = ToInt(x.id), Estudiante = x.estudiante == null ? null : ToFrontEstudiante(x.estudiante), Semestre = x.semestre, FechaInscripcion = x.fechaInscripcion, TipoMatricula = x.tipoMatricula, EstadoMatricula = x.estadoMatricula, Modalidad = x.modalidad };
+        private EvaluacionDTO ToFront(EvaluacionWSReference.EvaluacionDTO x) => new EvaluacionDTO { Id = ToInt(x.id), HorarioCurso = x.horarioCurso == null ? null : ToFrontHorarioCurso(x.horarioCurso), TipoEvaluacion = x.tipoEvaluacion, Peso = x.peso, FechaEvaluacion = x.fechaEvaluacion };
+        private NotaDTO ToFront(NotaWSReference.NotaDTO x) => new NotaDTO { Id = ToInt(x.id), Evaluacion = x.evaluacion == null ? null : ToFrontEvaluacion(x.evaluacion), Matricula = x.matricula == null ? null : ToFrontMatricula(x.matricula), HorarioCurso = x.horarioCurso == null ? null : ToFrontHorarioCurso(x.horarioCurso), Calificacion = x.calificacion };
+        private MatriculaHorarioDTO ToFront(MatriculaHorarioWSReference.MatriculaHorarioDTO x) => new MatriculaHorarioDTO { Matricula = x.matricula == null ? null : ToFrontMatricula(x.matricula), HorarioCurso = x.horarioCurso == null ? null : ToFrontHorarioCurso(x.horarioCurso), FechaRegistro = x.fechaRegistro };
+
+        // Helpers SOAP -> FRONT para DTO anidados de otros namespaces
+        private FacultadDTO ToFrontFacultad(dynamic x) => x == null ? null : new FacultadDTO { Id = ToInt(x.id), Nombre = x.nombre, Activo = x.activo };
+        private DepartamentoDTO ToFrontDepartamento(dynamic x) => x == null ? null : new DepartamentoDTO { Id = ToInt(x.id), Nombre = x.nombre, Activo = x.activo };
+        private AulaDTO ToFrontAula(dynamic x) => x == null ? null : new AulaDTO { Id = ToInt(x.id), CodigoAula = x.codigoAula, Ubicacion = x.ubicacion, Activo = x.activo };
+        private EspecialidadDTO ToFrontEspecialidad(dynamic x) => x == null ? null : new EspecialidadDTO { Id = ToInt(x.id), Facultad = ToFrontFacultad(x.facultad), Nombre = x.nombre, Activo = x.activo };
+        private EstudianteDTO ToFrontEstudiante(dynamic x) => x == null ? null : new EstudianteDTO { Id = ToInt(x.id), Especialidad = ToFrontEspecialidad(x.especialidad), CodigoUniversitario = x.codigoUniversitario, Nombres = x.nombres, Apellidos = x.apellidos, CorreoInstitucional = x.correoInstitucional, Activo = x.activo };
+        private DocenteDTO ToFrontDocente(dynamic x) => x == null ? null : new DocenteDTO { Id = ToInt(x.id), Departamento = ToFrontDepartamento(x.departamento), Codigo = x.codigo, NombreCompleto = x.nombreCompleto, Categoria = x.categoria, Dedicacion = x.dedicacion, Activo = x.activo };
+        private CursoDTO ToFrontCurso(dynamic x) => x == null ? null : new CursoDTO { Id = ToInt(x.id), Especialidad = ToFrontEspecialidad(x.especialidad), Codigo = x.codigo, Nombre = x.nombre, Creditos = x.creditos, NivelAcademico = x.nivelAcademico, EstadoCurso = x.estadoCurso, Activo = x.activo };
+        private HorarioCursoDTO ToFrontHorarioCurso(dynamic x) => x == null ? null : new HorarioCursoDTO { Id = ToInt(x.id), Curso = ToFrontCurso(x.curso), Semestre = x.semestre, CodigoHorario = x.codigoHorario, Docente = ToFrontDocente(x.docente), CupoMaximo = x.cupoMaximo, Estado = x.estado };
+        private MatriculaDTO ToFrontMatricula(dynamic x) => x == null ? null : new MatriculaDTO { Id = ToInt(x.id), Estudiante = ToFrontEstudiante(x.estudiante), Semestre = x.semestre, FechaInscripcion = x.fechaInscripcion, TipoMatricula = x.tipoMatricula, EstadoMatricula = x.estadoMatricula, Modalidad = x.modalidad };
+        private EvaluacionDTO ToFrontEvaluacion(dynamic x) => x == null ? null : new EvaluacionDTO { Id = ToInt(x.id), HorarioCurso = ToFrontHorarioCurso(x.horarioCurso), TipoEvaluacion = x.tipoEvaluacion, Peso = x.peso, FechaEvaluacion = x.fechaEvaluacion };
+
+        // ===============================================================
+        // FRONT -> SOAP
+        // ===============================================================
+        private FacultadWSReference.FacultadDTO ToSoapFacultad(FacultadDTO x) { var s = new FacultadWSReference.FacultadDTO { id = x.Id, nombre = x.Nombre, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+        private DepartamentoWSReference.DepartamentoDTO ToSoapDepartamento(DepartamentoDTO x) { var s = new DepartamentoWSReference.DepartamentoDTO { id = x.Id, nombre = x.Nombre, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+        private AulaWSReference.AulaDTO ToSoapAula(AulaDTO x) { var s = new AulaWSReference.AulaDTO { id = x.Id, codigoAula = x.CodigoAula, ubicacion = x.Ubicacion, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+
+        private EspecialidadWSReference.EspecialidadDTO ToSoapEspecialidad(EspecialidadDTO x) { var s = new EspecialidadWSReference.EspecialidadDTO { id = x.Id, nombre = x.Nombre, activo = x.Activo, facultad = ToSoapEspecialidadFacultad(x.Facultad) }; MarcarSpecified(s, "id", "activo"); return s; }
+        private EspecialidadWSReference.FacultadDTO ToSoapEspecialidadFacultad(FacultadDTO x) { if (x == null) return null; var s = new EspecialidadWSReference.FacultadDTO { id = x.Id, nombre = x.Nombre, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+
+        private EstudianteWSReference.EstudianteDTO ToSoapEstudiante(EstudianteDTO x) { var s = new EstudianteWSReference.EstudianteDTO { id = x.Id, especialidad = ToSoapEstudianteEspecialidad(x.Especialidad), codigoUniversitario = x.CodigoUniversitario, nombres = x.Nombres, apellidos = x.Apellidos, correoInstitucional = x.CorreoInstitucional, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+        private EstudianteWSReference.EspecialidadDTO ToSoapEstudianteEspecialidad(EspecialidadDTO x) { if (x == null) return null; var s = new EstudianteWSReference.EspecialidadDTO { id = x.Id, nombre = x.Nombre, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+
+        private DocenteWSReference.DocenteDTO ToSoapDocente(DocenteDTO x) { var s = new DocenteWSReference.DocenteDTO { id = x.Id, departamento = ToSoapDocenteDepartamento(x.Departamento), codigo = x.Codigo, nombreCompleto = x.NombreCompleto, categoria = x.Categoria, dedicacion = x.Dedicacion, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+        private DocenteWSReference.DepartamentoDTO ToSoapDocenteDepartamento(DepartamentoDTO x) { if (x == null) return null; var s = new DocenteWSReference.DepartamentoDTO { id = x.Id, nombre = x.Nombre, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+
+        private CursoWSReference.CursoDTO ToSoapCurso(CursoDTO x) { var s = new CursoWSReference.CursoDTO { id = x.Id, especialidad = ToSoapCursoEspecialidad(x.Especialidad), codigo = x.Codigo, nombre = x.Nombre, creditos = x.Creditos, nivelAcademico = x.NivelAcademico, estadoCurso = x.EstadoCurso, activo = x.Activo }; MarcarSpecified(s, "id", "creditos", "nivelAcademico", "activo"); return s; }
+        private CursoWSReference.EspecialidadDTO ToSoapCursoEspecialidad(EspecialidadDTO x) { if (x == null) return null; var s = new CursoWSReference.EspecialidadDTO { id = x.Id, nombre = x.Nombre, activo = x.Activo }; MarcarSpecified(s, "id", "activo"); return s; }
+
+        private HorarioCursoWSReference.HorarioCursoDTO ToSoapHorarioCurso(HorarioCursoDTO x) { var s = new HorarioCursoWSReference.HorarioCursoDTO { id = x.Id, curso = ToSoapHorarioCursoCurso(x.Curso), semestre = x.Semestre, codigoHorario = x.CodigoHorario, docente = ToSoapHorarioCursoDocente(x.Docente), cupoMaximo = x.CupoMaximo, estado = x.Estado }; MarcarSpecified(s, "id", "cupoMaximo"); return s; }
+        private HorarioCursoWSReference.CursoDTO ToSoapHorarioCursoCurso(CursoDTO x) { if (x == null) return null; var s = new HorarioCursoWSReference.CursoDTO { id = x.Id, codigo = x.Codigo, nombre = x.Nombre }; MarcarSpecified(s, "id"); return s; }
+        private HorarioCursoWSReference.DocenteDTO ToSoapHorarioCursoDocente(DocenteDTO x) { if (x == null) return null; var s = new HorarioCursoWSReference.DocenteDTO { id = x.Id, codigo = x.Codigo, nombreCompleto = x.NombreCompleto }; MarcarSpecified(s, "id"); return s; }
+
+        private HorarioCursoDetWSReference.HorarioCursoDetDTO ToSoapHorarioCursoDet(HorarioCursoDetDTO x) { var s = new HorarioCursoDetWSReference.HorarioCursoDetDTO { id = x.Id, horarioCurso = ToSoapHorarioCursoDetHorario(x.HorarioCurso), tipoSesion = x.TipoSesion, diaSemana = ToInt(x.DiaSemana), horaInicio = x.HoraInicio, horaFin = x.HoraFin, aula = ToSoapHorarioCursoDetAula(x.Aula), frecuencia = x.Frecuencia }; MarcarSpecified(s, "id", "diaSemana"); return s; }
+        private HorarioCursoDetWSReference.HorarioCursoDTO ToSoapHorarioCursoDetHorario(HorarioCursoDTO x) { if (x == null) return null; var s = new HorarioCursoDetWSReference.HorarioCursoDTO { id = x.Id }; MarcarSpecified(s, "id"); return s; }
+        private HorarioCursoDetWSReference.AulaDTO ToSoapHorarioCursoDetAula(AulaDTO x) { if (x == null) return null; var s = new HorarioCursoDetWSReference.AulaDTO { id = x.Id, codigoAula = x.CodigoAula }; MarcarSpecified(s, "id"); return s; }
+
+        private MatriculaWSReference.MatriculaDTO ToSoapMatricula(MatriculaDTO x) { var s = new MatriculaWSReference.MatriculaDTO { id = x.Id, estudiante = ToSoapMatriculaEstudiante(x.Estudiante), semestre = x.Semestre, fechaInscripcion = NormalizarFechaHora(x.FechaInscripcion), tipoMatricula = x.TipoMatricula, estadoMatricula = x.EstadoMatricula, modalidad = x.Modalidad }; MarcarSpecified(s, "id"); return s; }
+        private MatriculaWSReference.EstudianteDTO ToSoapMatriculaEstudiante(EstudianteDTO x) { if (x == null) return null; var s = new MatriculaWSReference.EstudianteDTO { id = x.Id }; MarcarSpecified(s, "id"); return s; }
+
+        private EvaluacionWSReference.EvaluacionDTO ToSoapEvaluacion(EvaluacionDTO x) { var s = new EvaluacionWSReference.EvaluacionDTO { id = x.Id, horarioCurso = ToSoapEvaluacionHorario(x.HorarioCurso), tipoEvaluacion = x.TipoEvaluacion, peso = x.Peso, fechaEvaluacion = NormalizarFechaHora(x.FechaEvaluacion) }; MarcarSpecified(s, "id", "peso"); return s; }
+        private EvaluacionWSReference.HorarioCursoDTO ToSoapEvaluacionHorario(HorarioCursoDTO x) { if (x == null) return null; var s = new EvaluacionWSReference.HorarioCursoDTO { id = x.Id }; MarcarSpecified(s, "id"); return s; }
+
+        private NotaWSReference.NotaDTO ToSoapNota(NotaDTO x) { var s = new NotaWSReference.NotaDTO { id = x.Id, evaluacion = ToSoapNotaEvaluacion(x.Evaluacion), matricula = ToSoapNotaMatricula(x.Matricula), horarioCurso = ToSoapNotaHorario(x.HorarioCurso), calificacion = x.Calificacion }; MarcarSpecified(s, "id", "calificacion"); return s; }
+        private NotaWSReference.EvaluacionDTO ToSoapNotaEvaluacion(EvaluacionDTO x) { if (x == null) return null; var s = new NotaWSReference.EvaluacionDTO { id = x.Id }; MarcarSpecified(s, "id"); return s; }
+        private NotaWSReference.MatriculaDTO ToSoapNotaMatricula(MatriculaDTO x) { if (x == null) return null; var s = new NotaWSReference.MatriculaDTO { id = x.Id }; MarcarSpecified(s, "id"); return s; }
+        private NotaWSReference.HorarioCursoDTO ToSoapNotaHorario(HorarioCursoDTO x) { if (x == null) return null; var s = new NotaWSReference.HorarioCursoDTO { id = x.Id }; MarcarSpecified(s, "id"); return s; }
+
+        private MatriculaHorarioWSReference.MatriculaHorarioDTO ToSoapMatriculaHorario(MatriculaHorarioDTO x) { var s = new MatriculaHorarioWSReference.MatriculaHorarioDTO { matricula = ToSoapMatriculaHorarioMatricula(x.Matricula), horarioCurso = ToSoapMatriculaHorarioHorario(x.HorarioCurso), fechaRegistro = NormalizarFechaHora(x.FechaRegistro) }; return s; }
+        private MatriculaHorarioWSReference.MatriculaDTO ToSoapMatriculaHorarioMatricula(MatriculaDTO x) { if (x == null) return null; var s = new MatriculaHorarioWSReference.MatriculaDTO { id = x.Id }; MarcarSpecified(s, "id"); return s; }
+        private MatriculaHorarioWSReference.HorarioCursoDTO ToSoapMatriculaHorarioHorario(HorarioCursoDTO x) { if (x == null) return null; var s = new MatriculaHorarioWSReference.HorarioCursoDTO { id = x.Id }; MarcarSpecified(s, "id"); return s; }
+
+        private void MarcarSpecified(object objeto, params string[] propiedades)
+        {
+            if (objeto == null) return;
+            Type tipo = objeto.GetType();
+            foreach (string propiedad in propiedades)
+            {
+                var prop = tipo.GetProperty(propiedad + "Specified");
+                if (prop != null && prop.CanWrite && prop.PropertyType == typeof(bool)) prop.SetValue(objeto, true);
+            }
+        }
+
+        private int ToInt(long value) => Convert.ToInt32(value);
+        private int ToInt(int value) => value;
+        private int ToInt(string? value) => int.TryParse(value, out int n) ? n : 0;
+
+        private string NormalizarFechaHora(string? fecha)
+        {
+            if (string.IsNullOrWhiteSpace(fecha)) return DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+            if (fecha.Length == 10) return fecha + "T00:00:00";
+            return fecha;
+        }
+    }
+}

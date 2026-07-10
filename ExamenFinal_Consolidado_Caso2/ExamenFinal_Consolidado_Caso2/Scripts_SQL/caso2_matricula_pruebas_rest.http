@@ -1,0 +1,77 @@
+### Caso 2 - pruebas REST
+@baseUrl = http://localhost:8080/RestServicesCaso2/webresources
+
+GET {{baseUrl}}/test/ping
+
+
+### Facultad
+GET {{baseUrl}}/facultades
+Accept: application/json
+
+
+### Departamento
+GET {{baseUrl}}/departamentos
+Accept: application/json
+
+
+### Especialidad
+GET {{baseUrl}}/especialidades
+Accept: application/json
+
+
+### Docente
+GET {{baseUrl}}/docentes
+Accept: application/json
+
+
+### Curso
+GET {{baseUrl}}/cursos
+Accept: application/json
+
+
+### Estudiante
+GET {{baseUrl}}/estudiantes
+Accept: application/json
+
+
+### Aula
+GET {{baseUrl}}/aulas
+Accept: application/json
+
+
+### HorarioCurso
+GET {{baseUrl}}/horarios-curso
+Accept: application/json
+
+
+### HorarioCursoDet
+GET {{baseUrl}}/horarios-curso-det
+Accept: application/json
+
+
+### Matricula
+GET {{baseUrl}}/matriculas
+Accept: application/json
+
+
+### Evaluacion
+GET {{baseUrl}}/evaluaciones
+Accept: application/json
+
+
+### Nota
+GET {{baseUrl}}/notas
+Accept: application/json
+
+
+### Cursos prerrequisitos
+GET {{baseUrl}}/cursos-prerrequisitos
+Accept: application/json
+
+### Matriculas horarios
+GET {{baseUrl}}/matriculas-horarios
+Accept: application/json
+
+### Promedio de una matrícula en un horario
+GET {{baseUrl}}/notas/promedio/1/1
+Accept: text/plain
