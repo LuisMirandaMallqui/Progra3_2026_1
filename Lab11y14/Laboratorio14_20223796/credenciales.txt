@@ -1,0 +1,8 @@
+db.hostMySQL=programacion3parcial.cwulcxw2eedn.us-east-1.rds.amazonaws.com
+db.hostMSSQL=programacion3parcial.cwulcxw2eedn.us-east-1.rds.amazonaws.com
+db.puertoMSSQL =1602 
+db.esquema=fifa?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima
+ db.usuario=admin
+db.password=pacoflaco123
+ db.puertoMySQL=3306
+db.type = mysql

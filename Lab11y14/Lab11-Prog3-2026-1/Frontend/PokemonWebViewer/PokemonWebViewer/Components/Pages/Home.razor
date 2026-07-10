@@ -1,0 +1,242 @@
+@page "/"
+@using System.IO
+@using System.Globalization
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>Pokémon Web Viewer</PageTitle>
+
+<div class="viewer-body" @onkeydown="HandleKeyDown" tabindex="0" @ref="containerRef" id="viewer-container"
+     style="--pokemon-theme-color: @themeColor; --pokemon-theme-color-glow: @themeColorGlow; --pokemon-theme-gradient: @themeGradient;">
+    
+    <!-- Background animated decorative blobs -->
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+
+    <div class="pokemon-card-container">
+        <!-- Top Bar: Current Index / Total Found -->
+        <div class="top-bar">
+            <span class="pokemon-id">N.º @FormattedIndex(currentIndex + 1)</span>
+            <span class="pokemon-counter">@((currentPokemon != null) ? (currentIndex + 1) : 0) de @totalCount Pokémon</span>
+        </div>
+
+
+
+        @if (currentPokemon != null)
+        {
+            <!-- Image Area with artwork and background glowing pulse -->
+            <div class="image-area">
+                <div class="artwork-bg"></div>
+                <img src="@currentPokemon.ImagenUrl" 
+                     alt="@currentPokemon.Nombre" 
+                     class="pokemon-image" 
+                     id="pokemon-image-element" />
+            </div>
+
+            <!-- Badges for Type and Evolution State -->
+            <div class="badge-row">
+                <span class="badge badge-type" id="pokemon-type-badge">@currentPokemon.Tipo</span>
+                <span class="badge badge-evo" id="pokemon-evo-badge">@currentPokemon.EstadoEvolutivo</span>
+            </div>
+
+            <!-- Pokémon Info Section -->
+            <div class="info-section">
+                <h1 class="pokemon-name" id="pokemon-name-title">@currentPokemon.Nombre</h1>
+                <p class="pokemon-desc" id="pokemon-desc-paragraph">@currentPokemon.Descripcion</p>
+                
+                <!-- Physical attributes grid -->
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <span class="spec-label">Altura</span>
+                        <span class="spec-value" id="pokemon-height-value">@currentPokemon.Altura.ToString("F2", CultureInfo.InvariantCulture) m</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Peso</span>
+                        <span class="spec-value" id="pokemon-weight-value">@currentPokemon.Peso.ToString("F1", CultureInfo.InvariantCulture) kg</span>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="info-section">
+                <p class="pokemon-desc">No hay Pokémon seleccionado o la base de datos está vacía.</p>
+            </div>
+        }
+
+        <!-- Navigation buttons -->
+        <div class="nav-buttons">
+            <button class="btn btn-nav" 
+                    @onclick="GoToFirst" 
+                    disabled="@(currentIndex <= 0)"
+                    id="btn-first"
+                    title="Primer Pokémon">
+                «
+            </button>
+            <button class="btn btn-primary" 
+                    @onclick="GoToPrevious" 
+                    disabled="@(currentIndex <= 0)"
+                    id="btn-prev">
+                Anterior
+            </button>
+            <button class="btn btn-primary" 
+                    @onclick="GoToNext" 
+                    disabled="@(currentIndex >= totalCount - 1)"
+                    id="btn-next">
+                Siguiente
+            </button>
+            <button class="btn btn-nav" 
+                    @onclick="GoToLast" 
+                    disabled="@(currentIndex >= totalCount - 1)"
+                    id="btn-last"
+                    title="Último Pokémon">
+                »
+            </button>
+        </div>
+
+        <!-- Keyboard Shortcut Hint -->
+        <div class="kbd-hint">
+            <span>Usa las teclas</span>
+            <span class="key-badge">←</span>
+            <span>y</span>
+            <span class="key-badge">→</span>
+            <span>para navegar</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    // ── PASO 2 del flujo del FRONT ─────────────────────────────────────────────
+    // El front SIEMPRE trabaja contra la INTERFAZ 'PokemonManager', nunca contra una
+    // clase concreta. Para este laboratorio la implementación DEBE ser la que consume
+    // el Web Service SOAP en Java: 'PokemonWSManager'.
+    //   ▸ Antes decía 'new PokemonMemoryManager()' (lee un CSV local). Por eso la
+    //     rúbrica marcó 2.5/5: "no se mostraban los pokémon DEL SERVICIO".
+    // FLUJO A SEGUIR PARA ENTENDER TODO:
+    //   Home.razor (este archivo)
+    //     → pokemonManager (PokemonWSManager.cs)        ← PASO 3
+    //       → PokemonWSClient (Connected Services/ServiceReference1/Reference.cs)
+    //         → [SOAP/HTTP] → PokemonWS.java (@WebService) → IPokemonBO → PokemonDAO → MySQL
+    private PokemonManager pokemonManager = new PokemonWSManager();
+    private Pokemon? currentPokemon;
+    private int currentIndex = 0;
+    private int totalCount = 0;
+    private ElementReference containerRef;
+
+    private string themeColor = "#2ecc71";
+    private string themeColorGlow = "rgba(46, 204, 113, 0.4)";
+    private string themeGradient = "linear-gradient(135deg, #11998e, #38ef7d)";
+
+    protected override void OnInitialized()
+    {
+        // Primera llamada al servicio: cuántos pokémon hay (getTotalCount del WS).
+        totalCount = pokemonManager.GetTotalCount();
+        
+        if (totalCount > 0)
+        {
+            SetCurrentPokemon(0);
+        }
+    }
+
+    private void SetCurrentPokemon(int index)
+    {
+        if (index >= 0 && index < totalCount)
+        {
+            currentIndex = index;
+            // Segunda llamada al servicio: trae UN pokémon por índice (getPokemon del WS).
+            currentPokemon = pokemonManager.GetPokemon(currentIndex);
+            UpdateTheme();
+        }
+    }
+
+    private void UpdateTheme()
+    {
+        if (currentPokemon != null)
+        {
+            var (color, glow, gradient) = GetTheme(currentPokemon.Tipo);
+            themeColor = color;
+            themeColorGlow = glow;
+            themeGradient = gradient;
+        }
+    }
+
+    private void GoToNext()
+    {
+        if (currentIndex < totalCount - 1)
+        {
+            SetCurrentPokemon(currentIndex + 1);
+        }
+    }
+
+    private void GoToPrevious()
+    {
+        if (currentIndex > 0)
+        {
+            SetCurrentPokemon(currentIndex - 1);
+        }
+    }
+
+    private void GoToFirst()
+    {
+        SetCurrentPokemon(0);
+    }
+
+    private void GoToLast()
+    {
+        SetCurrentPokemon(totalCount - 1);
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "ArrowRight" || e.Key == "Right")
+        {
+            GoToNext();
+        }
+        else if (e.Key == "ArrowLeft" || e.Key == "Left")
+        {
+            GoToPrevious();
+        }
+    }
+
+    private string FormattedIndex(int index)
+    {
+        return index.ToString("D3");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("eval", "document.getElementById('viewer-container').focus()");
+            }
+            catch { }
+        }
+    }
+
+
+    private (string color, string glow, string gradient) GetTheme(string tipo)
+    {
+        return (tipo?.ToUpper()) switch
+        {
+            "PLANTA" => ("#2ecc71", "rgba(46, 204, 113, 0.4)", "linear-gradient(135deg, #11998e, #38ef7d)"),
+            "FUEGO" => ("#e74c3c", "rgba(231, 76, 60, 0.4)", "linear-gradient(135deg, #f12711, #f5af19)"),
+            "AGUA" => ("#3498db", "rgba(52, 152, 219, 0.4)", "linear-gradient(135deg, #00c6ff, #0072ff)"),
+            "BICHO" => ("#87af30", "rgba(135, 175, 48, 0.4)", "linear-gradient(135deg, #a8ff78, #78ffd6)"),
+            "NORMAL" => ("#a8a77a", "rgba(168, 167, 122, 0.4)", "linear-gradient(135deg, #bdc3c7, #2c3e50)"),
+            "VENENO" => ("#a33ea1", "rgba(163, 62, 161, 0.4)", "linear-gradient(135deg, #6441a5, #2a0845)"),
+            "ELECTRICO" => ("#f1c40f", "rgba(241, 196, 15, 0.4)", "linear-gradient(135deg, #ffe259, #ffa751)"),
+            "TIERRA" => ("#e2bf65", "rgba(226, 191, 101, 0.4)", "linear-gradient(135deg, #ffd89b, #b98b58)"),
+            "HADA" => ("#d685ad", "rgba(214, 133, 173, 0.4)", "linear-gradient(135deg, #ee9ca7, #ffdde1)"),
+            "LUCHA" => ("#c22e28", "rgba(194, 46, 40, 0.4)", "linear-gradient(135deg, #f857a6, #ff5858)"),
+            "PSIQUICO" => ("#f95587", "rgba(249, 85, 135, 0.4)", "linear-gradient(135deg, #ea00d9, #711c91)"),
+            "ROCA" => ("#b6a136", "rgba(182, 161, 54, 0.4)", "linear-gradient(135deg, #8e9eab, #eef2f3)"),
+            "FANTASMA" => ("#735797", "rgba(115, 87, 151, 0.4)", "linear-gradient(135deg, #301934, #0f0c1b)"),
+            "DRAGON" => ("#6f35fc", "rgba(111, 53, 252, 0.4)", "linear-gradient(135deg, #130cb7, #52e5e7)"),
+            "HIELO" => ("#96d9d6", "rgba(150, 217, 214, 0.4)", "linear-gradient(135deg, #e0eafc, #cfdef3)"),
+            _ => ("#7f8c8d", "rgba(127, 140, 141, 0.4)", "linear-gradient(135deg, #7f8c8d, #bdc3c7)")
+        };
+    }
+}
+

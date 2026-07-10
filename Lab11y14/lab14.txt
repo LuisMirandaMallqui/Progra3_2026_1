@@ -1,0 +1,8 @@
+Alumno: 20223796
+
+Nota: 18
+
+Pregunta 1:  
+- El servicio REST DirectorTecnicoRS esta implementado de manera correcta. (8 pts)
+- El servicio REST SeleccionRS esta implementado de manera correcta. (8 pts)
+- El programa presenta errores al compilar y ejecutar. (2 pts)

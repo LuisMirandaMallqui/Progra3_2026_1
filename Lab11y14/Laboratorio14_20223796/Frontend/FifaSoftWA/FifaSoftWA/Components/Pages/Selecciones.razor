@@ -1,0 +1,141 @@
+﻿@page "/"
+@using FifaSoftWA.Components.Servicios
+@inject HttpClient Http
+@inject SeleccionStateService SeleccionState
+
+@* ── PASO 1 y 2 del flujo del FRONT ─────────────────────────────────────────────
+   Esta PÁGINA solo PINTA. No sabe de HTTP ni de JSON: le pide los datos al
+   SeleccionStateService (inyectado arriba), que es quien consume el REST.
+   Flujo:  Selecciones.razor (aquí)
+             → SeleccionState.CargarDatosAsync()   (SeleccionStateService.cs → PASO 3)
+               → HttpClientUtils.get()             (HttpClientUtils.cs)
+                 → REST Java (SeleccionRS / DirectorTecnicoRS)
+   La vista tiene 3 estados: 'cargando' → lista vacía → carrusel de tarjetas.        *@
+
+@if (cargando)
+{
+    <div class="loading-screen">
+        <div class="soccer-loader">
+            <div class="ball">⚽</div>
+            <div class="player">🏃‍♂️</div>
+        </div>
+        <h2>Cargando selecciones...</h2>
+        <p>Consultando los servicios REST implementados en Java...</p>
+    </div>
+}
+else if (selecciones.Count == 0 || SeleccionActual == null)
+{
+    <div class="message">No se encontraron selecciones.</div>
+}
+else
+{
+
+    <div class="worldcup-page">
+
+        <section class="hero">
+            <span class="badge-lab">Mundial FIFA 2026</span>
+            <h1>Selecciones clasificadas</h1>
+            <p>
+                Datos de prueba. En el laboratorio, este origen será reemplazado
+                por el servicio REST desarrollado en Java.
+            </p>
+        </section>
+
+        @if (selecciones.Count == 0)
+        {
+            <div class="message">No se encontraron selecciones.</div>
+        }
+        else
+        {
+            <section class="carousel-section">
+
+                <button class="arrow" @onclick="Anterior">‹</button>
+
+                <article class="team-card">
+
+                    <div class="team-main">
+                        <div class="team-left">
+                            <span class="group-label">GRUPO @SeleccionActual.Grupo</span>
+                            <h2>@SeleccionActual.Nombre</h2>
+                            <p>@SeleccionActual.Confederacion</p>
+                        </div>
+
+                        <div class="team-right">
+                            <img src="@SeleccionActual.UrlBandera" class="flag" />
+                            <div class="ranking">
+                                <span>Ranking FIFA</span>
+                                <strong>@SeleccionActual.RankingFIFA</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="coach-section">
+                        <h4>Director Técnico</h4>
+
+                        <div class="coach-grid">
+                            <div>
+                                <span>Nombre</span>
+                                <strong>@SeleccionActual.DirectorTecnico.Nombre</strong>
+                            </div>
+
+                            <div>
+                                <span>Nacionalidad</span>
+                                <strong>@SeleccionActual.DirectorTecnico.Nacionalidad</strong>
+                            </div>
+
+                            <div>
+                                <span>Edad</span>
+                                <strong>@SeleccionActual.DirectorTecnico.Edad años</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="counter">
+                        @(indiceActual + 1) / @selecciones.Count
+                    </div>
+
+                </article>
+
+                <button class="arrow" @onclick="Siguiente">›</button>
+
+            </section>
+        }
+
+    </div>
+}
+@code {
+    private List<Seleccion> selecciones = new();
+    private int indiceActual = 0;
+    private bool cargando = true;
+
+    private Seleccion? SeleccionActual =>
+        selecciones.Count > 0 ? selecciones[indiceActual] : null;
+
+    // Se carga en OnAfterRenderAsync (no en OnInitialized) para que primero se pinte la
+    // pantalla de "cargando" y recién después se llame al REST (que puede tardar).
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            cargando = true;
+            StateHasChanged();                          // muestra el spinner
+            await SeleccionState.CargarDatosAsync(Http); // ← PASO 3: consume el REST
+            selecciones = SeleccionState.Selecciones;    // copia local para el carrusel
+            indiceActual = 0;
+            cargando = false;
+            StateHasChanged();                          // repinta ya con los datos
+        }
+    }
+
+    private void Siguiente()
+    {
+        if (selecciones.Count == 0) return;
+        indiceActual = (indiceActual + 1) % selecciones.Count;
+    }
+
+    private void Anterior()
+    {
+        if (selecciones.Count == 0) return;
+        indiceActual = (indiceActual - 1 + selecciones.Count) % selecciones.Count;
+    }
+}

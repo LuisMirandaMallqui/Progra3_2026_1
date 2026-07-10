@@ -1,0 +1,337 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.worldcup-page {
+    height: 100vh;
+    overflow: hidden;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(circle at top, rgba(40, 200, 64, .16), transparent 28%), linear-gradient(180deg, #06111f 0%, #102542 100%);
+}
+
+/* HERO */
+
+.hero {
+    text-align: center;
+    padding: 18px 28px 8px;
+}
+
+.badge-lab {
+    display: inline-block;
+    background: rgba(108, 255, 63, .16);
+    color: #9dff7a;
+    border: 1px solid rgba(108, 255, 63, .45);
+    padding: 7px 20px;
+    border-radius: 999px;
+    font-weight: 900;
+}
+
+.hero h1 {
+    margin: 12px auto 4px;
+    font-size: 2.7rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.hero p {
+    max-width: 850px;
+    margin: 0 auto;
+    color: #d8dde7;
+    font-size: .98rem;
+}
+
+/* CARRUSEL */
+
+.carousel-section {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 34px;
+    padding: 8px 40px 26px;
+}
+
+/* CARD */
+
+.team-card {
+    width: 640px;
+    min-height: 360px;
+    border-radius: 28px;
+    padding: 26px;
+    background: rgba(255, 255, 255, .10);
+    border: 1px solid rgba(255, 255, 255, .18);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .35);
+    backdrop-filter: blur(12px);
+}
+
+.team-main {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 28px;
+    align-items: center;
+}
+
+.team-left {
+    text-align: left;
+}
+
+.group-label {
+    display: inline-block;
+    background: #6cff3f;
+    color: #06111f;
+    padding: 7px 20px;
+    border-radius: 999px;
+    font-weight: 950;
+    margin-bottom: 14px;
+}
+
+.team-left h2 {
+    color: #7eff46;
+    font-size: 3.3rem;
+    line-height: 1;
+    font-weight: 950;
+    margin: 4px 0 8px;
+}
+
+.team-left p {
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.team-right {
+    text-align: center;
+}
+
+.flag {
+    width: 220px;
+    height: 138px;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 2px solid rgba(255, 255, 255, .38);
+    box-shadow: 0 10px 28px rgba(0,0,0,.30);
+}
+
+.ranking {
+    margin: 14px auto 0;
+    width: 220px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, .24);
+    text-align: left;
+}
+
+    .ranking span {
+        display: block;
+        color: #9dff7a;
+        font-weight: 900;
+        font-size: .92rem;
+    }
+
+    .ranking strong {
+        font-size: 1.4rem;
+    }
+
+/* COACH */
+
+.coach-section {
+    margin-top: 22px;
+    border-radius: 20px;
+    background: rgba(108, 255, 63, .10);
+    border: 1px solid rgba(108, 255, 63, .30);
+    padding: 18px;
+}
+
+    .coach-section h4 {
+        margin: 0 0 14px;
+        color: #9dff7a;
+        font-weight: 950;
+        text-align: center;
+    }
+
+.coach-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.4fr .9fr;
+    gap: 12px;
+}
+
+    .coach-grid div {
+        background: rgba(0, 0, 0, .22);
+        border-radius: 14px;
+        padding: 12px 14px;
+    }
+
+    .coach-grid span {
+        display: block;
+        color: #9dff7a;
+        font-weight: 850;
+        font-size: .85rem;
+        margin-bottom: 4px;
+    }
+
+    .coach-grid strong {
+        font-size: .98rem;
+    }
+
+.counter {
+    margin-top: 14px;
+    text-align: center;
+    color: #dbe4ef;
+    font-weight: 950;
+    font-size: 1rem;
+}
+
+/* BOTONES */
+
+.arrow {
+    width: 62px;
+    height: 62px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #32d74b, #1ebd3a);
+    color: white;
+    font-size: 42px;
+    font-weight: 950;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .35);
+    transition: transform .2s ease, background .2s ease;
+}
+
+    .arrow:hover {
+        transform: scale(1.08);
+    }
+
+.message {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+    html, body {
+        overflow: auto;
+    }
+
+    .worldcup-page {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .carousel-section {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .team-card {
+        width: 92%;
+    }
+
+    .team-main {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .team-left {
+        text-align: center;
+    }
+
+    .coach-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =======================================================
+   PANTALLA DE CARGA
+   ======================================================= */
+
+.loading-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg,#06111d,#0c2340);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
+}
+
+    .loading-screen h2 {
+        margin-top: 25px;
+        margin-bottom: 10px;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .loading-screen p {
+        font-size: 1.05rem;
+        color: #d6dce6;
+        text-align: center;
+        max-width: 500px;
+    }
+
+/* =======================================================
+   ANIMACIÓN FUTBOL
+   ======================================================= */
+
+.soccer-loader {
+    position: relative;
+    width: 260px;
+    height: 90px;
+    overflow: hidden;
+}
+
+.player {
+    position: absolute;
+    left: 20px;
+    bottom: 10px;
+    font-size: 58px;
+    animation: playerRun .9s ease-in-out infinite alternate;
+}
+
+.ball {
+    position: absolute;
+    left: 125px;
+    bottom: 16px;
+    font-size: 42px;
+    animation: ballKick .9s ease-in-out infinite alternate;
+}
+
+@keyframes playerRun {
+
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(20px);
+    }
+}
+
+@keyframes ballKick {
+
+    from {
+        transform: translateX(0) rotate(0deg);
+    }
+
+    to {
+        transform: translateX(70px) rotate(720deg);
+    }
+}

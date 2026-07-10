@@ -1,0 +1,367 @@
+@page "/universidad"
+@rendermode InteractiveServer
+@using CSharpRestClient
+@* Esta página consume el backend a través de un "Manager".
+   Por defecto usa REST (UniversidadRSManager) → funciona apenas despliegues RestServicesCaso2.war.
+   Para la pregunta SOAP: cambia el tipo de abajo a UniversidadSOAPManager
+   (y sigue los 3 pasos indicados en Program.cs). El resto de la página NO cambia,
+   porque ambos managers exponen los mismos métodos (ListarCursos, ListarFacultads, ...). *@
+@inject UniversidadRSManager Manager
+
+<PageTitle>Caso 2 - Universidad</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="mb-1">Sistema universitario</h1>
+            <p class="text-muted mb-0">Gestión de cursos, horarios, matrícula, evaluaciones y notas.</p>
+        </div>
+        <button class="btn btn-primary" @onclick="CargarDatos" disabled="@_cargando">
+            @(_cargando ? "Cargando..." : "Actualizar")
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <div class="alert alert-danger"><strong>Error:</strong> @_error</div>
+    }
+
+    @if (_cargando)
+    {
+        <div class="alert alert-info">Cargando datos desde SOAP...</div>
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="card shadow-sm"><div class="card-body"><p class="text-muted mb-1">Cursos activos</p><h3>@_cursos.Count(c => c.Activo)</h3></div></div></div>
+            <div class="col-md-3"><div class="card shadow-sm"><div class="card-body"><p class="text-muted mb-1">Estudiantes</p><h3>@_estudiantes.Count(e => e.Activo)</h3></div></div></div>
+            <div class="col-md-3"><div class="card shadow-sm"><div class="card-body"><p class="text-muted mb-1">Horarios abiertos</p><h3>@_horarios.Count(h => h.Estado == "ABIERTO")</h3></div></div></div>
+            <div class="col-md-3"><div class="card shadow-sm"><div class="card-body"><p class="text-muted mb-1">Promedio general</p><h3>@PromedioGeneral.ToString("0.00")</h3></div></div></div>
+        </div>
+
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item"><button class="nav-link @Tab("cursos")" @onclick='() => _tab = "cursos"'>Cursos</button></li>
+            <li class="nav-item"><button class="nav-link @Tab("horarios")" @onclick='() => _tab = "horarios"'>Horarios</button></li>
+            <li class="nav-item"><button class="nav-link @Tab("matriculas")" @onclick='() => _tab = "matriculas"'>Matrículas</button></li>
+            <li class="nav-item"><button class="nav-link @Tab("evaluaciones")" @onclick='() => _tab = "evaluaciones"'>Evaluaciones y notas</button></li>
+        </ul>
+
+        @if (_tab == "cursos")
+        {
+            <div class="card shadow-sm">
+                <div class="card-header d-flex flex-wrap justify-content-between gap-2">
+                    <strong>Catálogo de cursos</strong>
+                    <input class="form-control form-control-sm" style="width:260px" placeholder="Buscar curso..." @bind="_busquedaCurso" @bind:event="oninput" />
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr><th>ID</th><th>Código</th><th>Nombre</th><th>Especialidad</th><th>Créditos</th><th>Nivel</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var c in CursosFiltrados)
+                        {
+                            <tr>
+                                <td>@c.Id</td>
+                                <td><strong>@c.Codigo</strong></td>
+                                <td>@c.Nombre</td>
+                                <td>@NombreEspecialidad(c.Especialidad?.Id ?? 0)</td>
+                                <td>@c.Creditos</td>
+                                <td>@c.NivelAcademico</td>
+                                <td><span class="badge @(c.EstadoCurso == "ACTIVO" ? "bg-success" : "bg-secondary")">@c.EstadoCurso</span></td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        @if (_tab == "horarios")
+        {
+            <div class="row g-3">
+                <div class="col-xl-7">
+                    <div class="card shadow-sm">
+                        <div class="card-header"><strong>Horarios por curso</strong></div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light"><tr><th>ID</th><th>Curso</th><th>Semestre</th><th>Horario</th><th>Docente</th><th>Cupo</th><th>Estado</th></tr></thead>
+                                <tbody>
+                                @foreach (var h in _horarios)
+                                {
+                                    <tr>
+                                        <td>@h.Id</td>
+                                        <td>@NombreCurso(h.Curso?.Id ?? 0)</td>
+                                        <td>@h.Semestre</td>
+                                        <td>@h.CodigoHorario</td>
+                                        <td>@NombreDocente(h.Docente?.Id ?? 0)</td>
+                                        <td>@h.CupoMaximo</td>
+                                        <td>@h.Estado</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-5">
+                    <div class="card shadow-sm">
+                        <div class="card-header"><strong>Detalle de sesiones</strong></div>
+                        <div class="list-group list-group-flush">
+                        @foreach (var d in _horarioDetalles)
+                        {
+                            <div class="list-group-item">
+                                <strong>@NombreCurso(HorarioPorId(d.HorarioCurso?.Id ?? 0)?.Curso?.Id ?? 0)</strong><br />
+                                <span class="small text-muted">@d.TipoSesion - @d.DiaSemana, @d.HoraInicio a @d.HoraFin - Aula @NombreAula(d.Aula?.Id ?? 0)</span>
+                            </div>
+                        }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (_tab == "matriculas")
+        {
+            <div class="row g-3">
+                <div class="col-xl-5">
+                    <div class="card shadow-sm">
+                        <div class="card-header"><strong>Registrar matrícula</strong></div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <label class="form-label">Estudiante</label>
+                                <select class="form-select" @bind="_nuevoEstudianteId">
+                                    <option value="0">Seleccione</option>
+                                    @foreach (var e in _estudiantes)
+                                    {
+                                        <option value="@e.Id">@e.CodigoUniversitario - @e.Nombres @e.Apellidos</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6"><label class="form-label">Semestre</label><input class="form-control" @bind="_nuevaMatricula.Semestre" /></div>
+                                <div class="col-md-6"><label class="form-label">Fecha</label><input class="form-control" placeholder="yyyy-MM-dd" @bind="_nuevaMatricula.FechaInscripcion" /></div>
+                            </div>
+                            <div class="row g-2 mt-1">
+                                <div class="col-md-6">
+                                    <label class="form-label">Tipo</label>
+                                    <select class="form-select" @bind="_nuevaMatricula.TipoMatricula"><option>REGULAR</option><option>EXTEMPORANEA</option></select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Modalidad</label>
+                                    <select class="form-select" @bind="_nuevaMatricula.Modalidad"><option>PRESENCIAL</option><option>VIRTUAL</option><option>HIBRIDA</option></select>
+                                </div>
+                            </div>
+                            <div class="mb-3 mt-2">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" @bind="_nuevaMatricula.EstadoMatricula"><option>REGISTRADA</option><option>PENDIENTE</option><option>CONFIRMADA</option><option>CANCELADA</option></select>
+                            </div>
+                            <button class="btn btn-success w-100" @onclick="CrearMatricula">Guardar matrícula</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-7">
+                    <div class="card shadow-sm">
+                        <div class="card-header"><strong>Matrículas registradas</strong></div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light"><tr><th>ID</th><th>Estudiante</th><th>Semestre</th><th>Tipo</th><th>Modalidad</th><th>Estado</th></tr></thead>
+                                <tbody>
+                                @foreach (var m in _matriculas)
+                                {
+                                    <tr><td>@m.Id</td><td>@NombreEstudiante(m.Estudiante?.Id ?? 0)</td><td>@m.Semestre</td><td>@m.TipoMatricula</td><td>@m.Modalidad</td><td>@m.EstadoMatricula</td></tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (_tab == "evaluaciones")
+        {
+            <div class="row g-3">
+                <div class="col-xl-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header"><strong>Evaluaciones</strong></div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light"><tr><th>ID</th><th>Horario</th><th>Tipo</th><th>Peso</th><th>Fecha</th></tr></thead>
+                                <tbody>
+                                @foreach (var e in _evaluaciones)
+                                {
+                                    <tr><td>@e.Id</td><td>#@e.HorarioCurso?.Id</td><td>@e.TipoEvaluacion</td><td>@e.Peso%</td><td>@e.FechaEvaluacion</td></tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header"><strong>Notas</strong></div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light"><tr><th>ID</th><th>Evaluación</th><th>Estudiante</th><th>Curso</th><th>Nota</th></tr></thead>
+                                <tbody>
+                                @foreach (var n in _notas)
+                                {
+                                    var mat = MatriculaPorId(n.Matricula?.Id ?? 0);
+                                    <tr><td>@n.Id</td><td>#@n.Evaluacion?.Id</td><td>@NombreEstudiante(mat?.Estudiante?.Id ?? 0)</td><td>@NombreCurso(HorarioPorId(n.HorarioCurso?.Id ?? 0)?.Curso?.Id ?? 0)</td><td>@n.Calificacion.ToString("0.00")</td></tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private bool _cargando = true;
+    private string? _error;
+    private string _tab = "cursos";
+    private string _busquedaCurso = "";
+
+    private List<FacultadDTO> _facultades = new();
+    private List<EspecialidadDTO> _especialidades = new();
+    private List<EstudianteDTO> _estudiantes = new();
+    private List<DepartamentoDTO> _departamentos = new();
+    private List<DocenteDTO> _docentes = new();
+    private List<AulaDTO> _aulas = new();
+    private List<CursoDTO> _cursos = new();
+    private List<HorarioCursoDTO> _horarios = new();
+    private List<HorarioCursoDetDTO> _horarioDetalles = new();
+    private List<MatriculaDTO> _matriculas = new();
+    private List<EvaluacionDTO> _evaluaciones = new();
+    private List<NotaDTO> _notas = new();
+
+    private int _nuevoEstudianteId = 0;
+    private MatriculaDTO _nuevaMatricula = new()
+    {
+        Semestre = "2026-1",
+        FechaInscripcion = DateTime.Today.ToString("yyyy-MM-dd"),
+        TipoMatricula = "REGULAR",
+        EstadoMatricula = "REGISTRADA",
+        Modalidad = "PRESENCIAL"
+    };
+
+    protected override async Task OnInitializedAsync() => await CargarDatos();
+
+    private async Task CargarDatos()
+    {
+        try
+        {
+            _cargando = true;
+            _error = null;
+
+            var data = await Task.Run(() => new
+            {
+                Facultades = Manager.ListarFacultads(),
+                Especialidades = Manager.ListarEspecialidads(),
+                Estudiantes = Manager.ListarEstudiantes(),
+                Departamentos = Manager.ListarDepartamentos(),
+                Docentes = Manager.ListarDocentes(),
+                Aulas = Manager.ListarAulas(),
+                Cursos = Manager.ListarCursos(),
+                Horarios = Manager.ListarHorarioCursos(),
+                Detalles = Manager.ListarHorarioCursoDets(),
+                Matriculas = Manager.ListarMatriculas(),
+                Evaluaciones = Manager.ListarEvaluacions(),
+                Notas = Manager.ListarNotas()
+            });
+
+            _facultades = data.Facultades ?? new();
+            _especialidades = data.Especialidades ?? new();
+            _estudiantes = data.Estudiantes ?? new();
+            _departamentos = data.Departamentos ?? new();
+            _docentes = data.Docentes ?? new();
+            _aulas = data.Aulas ?? new();
+            _cursos = data.Cursos ?? new();
+            _horarios = data.Horarios ?? new();
+            _horarioDetalles = data.Detalles ?? new();
+            _matriculas = data.Matriculas ?? new();
+            _evaluaciones = data.Evaluaciones ?? new();
+            _notas = data.Notas ?? new();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _cargando = false;
+        }
+    }
+
+    private string Tab(string t) => _tab == t ? "active" : "";
+
+    private IEnumerable<CursoDTO> CursosFiltrados =>
+        _cursos.Where(c => string.IsNullOrWhiteSpace(_busquedaCurso) ||
+                           (c.Codigo ?? "").Contains(_busquedaCurso, StringComparison.OrdinalIgnoreCase) ||
+                           (c.Nombre ?? "").Contains(_busquedaCurso, StringComparison.OrdinalIgnoreCase));
+
+    private double PromedioGeneral => _notas.Any() ? _notas.Average(n => n.Calificacion) : 0;
+
+    private EspecialidadDTO? EspecialidadPorId(int id) => _especialidades.FirstOrDefault(e => e.Id == id);
+    private EstudianteDTO? EstudiantePorId(int id) => _estudiantes.FirstOrDefault(e => e.Id == id);
+    private CursoDTO? CursoPorId(int id) => _cursos.FirstOrDefault(c => c.Id == id);
+    private DocenteDTO? DocentePorId(int id) => _docentes.FirstOrDefault(d => d.Id == id);
+    private AulaDTO? AulaPorId(int id) => _aulas.FirstOrDefault(a => a.Id == id);
+    private HorarioCursoDTO? HorarioPorId(int id) => _horarios.FirstOrDefault(h => h.Id == id);
+    private MatriculaDTO? MatriculaPorId(int id) => _matriculas.FirstOrDefault(m => m.Id == id);
+
+    private string NombreEspecialidad(int id) => EspecialidadPorId(id)?.Nombre ?? $"Especialidad #{id}";
+    private string NombreEstudiante(int id)
+    {
+        var e = EstudiantePorId(id);
+        return e == null ? $"Estudiante #{id}" : $"{e.CodigoUniversitario} - {e.Nombres} {e.Apellidos}";
+    }
+    private string NombreCurso(int id)
+    {
+        var c = CursoPorId(id);
+        return c == null ? $"Curso #{id}" : $"{c.Codigo} - {c.Nombre}";
+    }
+    private string NombreDocente(int id) => DocentePorId(id)?.NombreCompleto ?? $"Docente #{id}";
+    private string NombreAula(int id) => AulaPorId(id)?.CodigoAula ?? $"Aula #{id}";
+
+    private async Task CrearMatricula()
+    {
+        try
+        {
+            _error = null;
+
+            if (_nuevoEstudianteId == 0)
+            {
+                _error = "Selecciona un estudiante.";
+                return;
+            }
+
+            _nuevaMatricula.Estudiante = new EstudianteDTO { Id = _nuevoEstudianteId };
+
+            await Task.Run(() => Manager.InsertarMatricula(_nuevaMatricula));
+
+            _nuevoEstudianteId = 0;
+            _nuevaMatricula = new MatriculaDTO
+            {
+                Semestre = "2026-1",
+                FechaInscripcion = DateTime.Today.ToString("yyyy-MM-dd"),
+                TipoMatricula = "REGULAR",
+                EstadoMatricula = "REGISTRADA",
+                Modalidad = "PRESENCIAL"
+            };
+
+            await CargarDatos();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}
